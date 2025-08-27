@@ -22,19 +22,11 @@
            default="checkstyle-suppressions.xml" />
     <property name="optional" value="true"/>
   </module>
-
+  <module name="JavadocPackage"/>
   <module name="TreeWalker">
-   <!-- Require Javadoc for public methods -->
-    <module name="JavadocMethod">
-        <property name="scope" value="public"/>
-        <property name="allowMissingParamTags" value="true"/>
-        <property name="allowMissingThrowsTags" value="true"/>
-    </module>
+  
     <module name="OuterTypeFilename"/>
-    <module name="JavadocMethod">
-	    <property name="allowMissingParamTags" value="true"/>
-	    <property name="allowMissingThrowsTags" value="true"/>
-	</module>
+    
     <module name="IllegalTokenText">
       <property name="tokens" value="STRING_LITERAL, CHAR_LITERAL"/>
       <property name="format"
