@@ -22,9 +22,9 @@
            default="checkstyle-suppressions.xml" />
     <property name="optional" value="true"/>
   </module>
-  <module name="JavadocPackage"/>
+ 
   <module name="TreeWalker">
-  
+  	<module name="WhitespaceAfter"/>
     <module name="OuterTypeFilename"/>
     
     <module name="IllegalTokenText">
