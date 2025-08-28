@@ -1,7 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
-eclipse.project.name = 'CPS-353 Project' 
+eclipse.project.name = 'CPS353 Project' 
 
 sourceSets {
 	main {

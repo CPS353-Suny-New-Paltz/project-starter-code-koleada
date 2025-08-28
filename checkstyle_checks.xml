@@ -22,9 +22,11 @@
            default="checkstyle-suppressions.xml" />
     <property name="optional" value="true"/>
   </module>
-
+ 
   <module name="TreeWalker">
+  	<module name="WhitespaceAfter"/>
     <module name="OuterTypeFilename"/>
+    
     <module name="IllegalTokenText">
       <property name="tokens" value="STRING_LITERAL, CHAR_LITERAL"/>
       <property name="format"
