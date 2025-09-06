@@ -4,6 +4,7 @@ This repo will start you off with an initial configuration that you'll modify as
 
 ### API Diagram
 
+![API Diagram](https://raw.githubusercontent.com/CPS353-Suny-New-Paltz/project-starter-code-koleada/refs/heads/main/APIDiagram.jpg)
 
 ### Compute Engine
 
