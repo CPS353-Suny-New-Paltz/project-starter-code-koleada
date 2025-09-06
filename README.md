@@ -6,6 +6,7 @@ This repo will start you off with an initial configuration that you'll modify as
 
 ![API Diagram](https://raw.githubusercontent.com/CPS353-Suny-New-Paltz/project-starter-code-koleada/refs/heads/main/APIDiagram.jpg)
 
+
 ### Compute Engine
 
 For the computation engine, I chose to perform a simplified version of the PBKDF2 hashing algorithm. This hashing function is designed to be computationally expensive to make the resulting hashes harder to crack. 
