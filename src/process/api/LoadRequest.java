@@ -1,7 +1,15 @@
 package process.api;
 
+import shared.stuff.Resource;
+
+/**
+ * This class creates a request to load data from a given resource
+ */
 public class LoadRequest {
-  public interface LoadRequest {
-    Resource getResource();
+
+  Resource source;
+
+  public LoadRequest(Resource source) {
+    this.source = source;
   }
 }

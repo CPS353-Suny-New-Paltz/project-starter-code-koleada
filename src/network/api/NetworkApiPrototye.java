@@ -10,6 +10,11 @@ import shared.stuff.ResourceType;
  */
 public class NetworkApiPrototye {
 
+  /**
+   * This prototype method showcases how the network API is expected to be used
+   * 
+   * @param api
+   */
   @NetworkAPIPrototype
   public void prototype(NetworkApi api) {
 
