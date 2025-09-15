@@ -37,8 +37,8 @@ public class ProcessApiPrototype {
     StoreRequest storeReq = new StoreRequest(rec, data);
     StoreResponse storeResp = api.store(storeReq);
     System.out.println("Store status: " + storeResp.success());
-    if (storeResp.message != null) {
-      System.out.println(storeResp.message);
+    if (storeResp.getMessage() != null) {
+      System.out.println(storeResp.getMessage());
     }
 
     // Load data from a resource
@@ -47,12 +47,12 @@ public class ProcessApiPrototype {
 
     LoadRequest loadReq = new LoadRequest(rec2);
     LoadResponse loadResp = api.load(loadReq);
-    System.out.println("Load status: " + loadResp.status);
-    if (loadResp.message != null) {
-      System.out.println(loadResp.message);
+    System.out.println("Load status: " + loadResp.getStatus());
+    if (loadResp.getMessage() != null) {
+      System.out.println(loadResp.getMessage());
     }
-    if (loadResp.data != null) {
-      System.out.println("Loaded data: " + loadResp.data);
+    if (loadResp.getData() != null) {
+      System.out.println("Loaded data: " + loadResp.getData());
     } else {
       System.out.println("No data returned.");
     }

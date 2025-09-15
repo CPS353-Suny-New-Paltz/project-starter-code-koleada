@@ -4,8 +4,8 @@ import shared.stuff.ApiStatus;
 
 public class StoreResponse<T> {
 
-  ApiStatus status;
-  String message;
+  private final ApiStatus status;
+  private final String message;
 
   public StoreResponse(ApiStatus status, String message) {
     this.status = status;
@@ -19,5 +19,12 @@ public class StoreResponse<T> {
 
   public boolean success() {
     return status == ApiStatus.SUCCESS;
+  }
+
+  public ApiStatus getStatus() {
+    return this.status;
+  }
+  public String getMessage() {
+    return this.message;
   }
 }

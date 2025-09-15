@@ -7,9 +7,13 @@ import shared.stuff.Resource;
  */
 public class LoadRequest {
 
-  Resource source;
+  private final Resource source;
 
   public LoadRequest(Resource source) {
     this.source = source;
+  }
+
+  public Resource getSource() {
+    return this.source;
   }
 }

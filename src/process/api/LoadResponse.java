@@ -4,9 +4,9 @@ import shared.stuff.ApiStatus;
 
 public class LoadResponse<T> {
 
-  ApiStatus status;
-  DataBatch<T> data;
-  String message;
+  private final ApiStatus status;
+  private final DataBatch<T> data;
+  private final String message;
 
   public LoadResponse(ApiStatus status, DataBatch<T> data, String message) {
     this.status = status;
@@ -16,5 +16,14 @@ public class LoadResponse<T> {
 
   public boolean success() {
     return status == ApiStatus.SUCCESS;
+  }
+  public DataBatch<T> getData() {
+    return this.data;
+  }
+  public String getMessage() {
+    return this.message;
+  }
+  public ApiStatus getStatus() {
+    return this.status;
   }
 }

@@ -6,7 +6,7 @@ package process.api;
  */
 public class DataBatch<T> {
 
-  T dataSource;
+  private final T dataSource;
 
   /**
    * @param dataSource
@@ -14,6 +14,10 @@ public class DataBatch<T> {
    */
   public DataBatch(T dataSource) {
     this.dataSource = dataSource;
+  }
+
+  public T getDataSource() {
+    return this.dataSource;
   }
 
 }
