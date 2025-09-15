@@ -6,10 +6,10 @@ import shared.stuff.ApiStatus;
  * Response to a LoadDataRequest
  */
 public final class LoadDataResponse {
-  ApiStatus status;
-  byte[] payload; // optional if error
-  Delimiter delimiter; // optional
-  String errorMessage; // optional
+  private final ApiStatus status;
+  private final byte[] payload; // optional if error
+  private final Delimiter delimiter; // optional
+  private final String errorMessage; // optional
 
   public LoadDataResponse(ApiStatus status, byte[] payload, Delimiter delimiter,
       String errorMessage) {
@@ -17,6 +17,23 @@ public final class LoadDataResponse {
     this.payload = payload;
     this.delimiter = delimiter;
     this.errorMessage = errorMessage;
+
+  }
+
+  public ApiStatus getStatus() {
+    return this.status;
+  }
+
+  public String getErrorMessage() {
+    return this.errorMessage;
+  }
+
+  public Delimiter getDelimiter() {
+    return this.delimiter;
+  }
+
+  public byte[] getPayload() {
+    return this.payload;
   }
 
   /**

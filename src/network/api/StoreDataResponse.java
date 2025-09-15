@@ -7,15 +7,25 @@ import shared.stuff.Resource;
  * A basic response to a data store request
  */
 public final class StoreDataResponse {
-  ApiStatus status;
-  Resource location;
-  String errorMessage;
+  private final ApiStatus status;
+  private final Resource location;
+  private final String errorMessage;
 
   public StoreDataResponse(ApiStatus status, Resource location,
       String errorMessage) {
     this.status = status;
     this.location = location;
     this.errorMessage = errorMessage;
+  }
+
+  public ApiStatus getStatus() {
+    return status;
+  }
+  public String getErrorMessage() {
+    return errorMessage;
+  }
+  public Resource getLocation() {
+    return location;
   }
 
   public static StoreDataResponse success(Resource location) {

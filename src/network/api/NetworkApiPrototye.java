@@ -40,20 +40,20 @@ public class NetworkApiPrototye {
         new StoreDataRequest(sessionToken, resource, "Hello World".getBytes()));
 
     // check is store was successful
-    if (!(stoResponse.status.equals(ApiStatus.SUCCESS))
-        && stoResponse.errorMessage != null) {
-      System.out.println(stoResponse.errorMessage);
+    if (!(stoResponse.getStatus() == ApiStatus.SUCCESS)
+        && stoResponse.getErrorMessage() != null) {
+      System.out.println(stoResponse.getErrorMessage());
     }
 
     // Load Data
     LoadDataResponse loadResponse = api
         .loadData(new LoadDataRequest(sessionToken, resource));
 
-    if (!(loadResponse.status.equals(ApiStatus.SUCCESS))
-        && loadResponse.errorMessage != null) {
-      System.out.println(loadResponse.errorMessage);
+    if (!(loadResponse.getStatus() == ApiStatus.SUCCESS)
+        && loadResponse.getErrorMessage() != null) {
+      System.out.println(loadResponse.getErrorMessage());
     } else {
-      System.out.println(loadResponse.payload);
+      System.out.println(loadResponse.getPayload());
     }
 
     // Logout
