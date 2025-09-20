@@ -10,10 +10,18 @@ import shared.stuff.Resource;
 public final class LoadDataRequest {
   private final String sessionToken;
   private final Resource source;
+  private final Delimiter delimiter;
 
+  public LoadDataRequest(String sessionToken, Resource source,
+      Delimiter delimiter) {
+    this.sessionToken = Objects.requireNonNull(sessionToken);
+    this.source = Objects.requireNonNull(source);
+    this.delimiter = delimiter;
+  }
   public LoadDataRequest(String sessionToken, Resource source) {
     this.sessionToken = Objects.requireNonNull(sessionToken);
     this.source = Objects.requireNonNull(source);
+    this.delimiter = Delimiter.defaultDelimiter();
   }
 
   public String getSessionToken() {
@@ -21,5 +29,8 @@ public final class LoadDataRequest {
   }
   public Resource getSource() {
     return source;
+  }
+  public Delimiter getDelimiter() {
+    return delimiter;
   }
 }

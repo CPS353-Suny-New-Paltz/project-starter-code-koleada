@@ -5,23 +5,23 @@ package network.api;
  * when not specified by the user
  */
 public final class Delimiter {
-  private final char value;
+  private final String value;
 
-  private Delimiter(char value) {
+  private Delimiter(String value) {
     this.value = value;
   }
 
-  public char getValue() {
+  public String getValue() {
     return value;
   }
 
-  public static final Delimiter COMMA = new Delimiter(',');
-  public static final Delimiter COLON = new Delimiter(':');
-  public static final Delimiter SEMICOLON = new Delimiter(';');
-  public static final Delimiter PIPE = new Delimiter('|');
+  public static final Delimiter COMMA = new Delimiter(",");
+  public static final Delimiter COLON = new Delimiter(":");
+  public static final Delimiter SEMICOLON = new Delimiter(";");
+  public static final Delimiter PIPE = new Delimiter("|");
 
   /**
-   * Default delimiter used if user does not specify. w
+   * Default delimiter used if user does not specify
    */
   public static Delimiter defaultDelimiter() {
     return COMMA;

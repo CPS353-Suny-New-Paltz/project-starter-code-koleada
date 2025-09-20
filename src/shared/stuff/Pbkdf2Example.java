@@ -1,4 +1,4 @@
-package project.annotations;
+package shared.stuff;
 
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;

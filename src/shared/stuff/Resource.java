@@ -9,20 +9,19 @@ import java.util.Objects;
 public class Resource<T> {
   private final ResourceType type;
   private final String uri; // optional for CUSTOM resources
-  private final DataBatch<T> data; // used for CUSTOM in-memory store/load
+  private T data; // used for CUSTOM in-memory store/load
 
   // Construction with specified URI
   public Resource(ResourceType type, String uri) {
     this.type = Objects.requireNonNull(type);
     this.uri = uri;
-    this.data = new DataBatch<>();
   }
 
   // No URI constructor (eg for CUSTOM resources)
   public Resource(ResourceType type, T data) {
     this.type = Objects.requireNonNull(type);
     this.uri = null;
-    this.data = new DataBatch(data);
+    this.data = data;
   }
 
   public ResourceType getType() {
@@ -31,8 +30,11 @@ public class Resource<T> {
   public String getUri() {
     return uri;
   }
-  public DataBatch getData() {
+  public T getData() {
     return data;
+  }
+  public void setData(T data) {
+    this.data = data;
   }
 
 }
