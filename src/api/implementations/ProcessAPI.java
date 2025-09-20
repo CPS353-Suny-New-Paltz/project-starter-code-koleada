@@ -12,7 +12,7 @@ import shared.stuff.DataBatch;
 import shared.stuff.Resource;
 
 /**
- * Implementation of the ProcesskApi interface
+ * Implementation of the ProcessApi interface
  */
 public class ProcessAPI<T> implements ProcessApi {
 
