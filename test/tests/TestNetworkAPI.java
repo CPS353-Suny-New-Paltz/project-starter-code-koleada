@@ -179,9 +179,6 @@ public class TestNetworkAPI {
 
     when(mockProcess.store(req)).thenReturn(resp);
 
-    NetworkAPI networkApi = new NetworkAPI();
-    networkApi.setReadWrite(mockProcess);
-
     // We will eventually implement a feature that translates the users
     // StoreDataRequest into the ProcessAPI StoreRequest format and how the
     // networkAPI translates the Process API StoreResponse into a
@@ -192,7 +189,7 @@ public class TestNetworkAPI {
     StoreDataResponse networkResp = networkApi.storeData(networkReq);
 
     // this will fail now
-    assertEquals(ApiStatus.SUCCESS, resp.getStatus());
+    assertEquals(ApiStatus.SUCCESS, networkResp.getStatus());
   }
 
   /**
