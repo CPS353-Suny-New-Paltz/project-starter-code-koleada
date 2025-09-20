@@ -24,6 +24,9 @@ public class TestProcessAPI {
   private ProcessAPI<?> processApi;
   private Resource dummyResource;
 
+  /**
+   * Creates an example resource and uses it in the ProcessAPI constructor
+   */
   @BeforeEach
   void setup() {
     // create dummy resource for ProcessAPI
@@ -31,6 +34,9 @@ public class TestProcessAPI {
     processApi = new ProcessAPI<>(dummyResource);
   }
 
+  /**
+   * Tests the load method by examining response values
+   */
   @Test
   void testLoad() {
     // tests the ProcessAPI.load() method
@@ -45,6 +51,9 @@ public class TestProcessAPI {
                                        // buffer
   }
 
+  /**
+   * Tests the store method again by examining response values
+   */
   @Test
   void testStore() {
     // tsets the ProcessAPI.store() method
@@ -59,6 +68,10 @@ public class TestProcessAPI {
     assertEquals("Not Implemented", response.getMessage());
   }
 
+  /**
+   * Tests the ProcessAPI resource getters and setters, as well as the resource
+   * class getters
+   */
   @Test
   void testProcessApiResource() {
 

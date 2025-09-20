@@ -15,15 +15,24 @@ import conceptual.api.JobRequest;
 import conceptual.api.JobResponse;
 import conceptual.api.JobStatus;
 
+/**
+ * Test suiute for the ConceptualAPI implementation
+ */
 public class TestConceptualAPI {
 
   private ConceptualApi<String> conceptualApi;
 
+  /**
+   * Create ConceptualAPI
+   */
   @BeforeEach
   void setup() {
     conceptualApi = new ConceptualAPI<>();
   }
 
+  /**
+   * Tests the submitJob method of the conceptual API
+   */
   @Test
   void testSubmitJob() {
 
@@ -31,7 +40,6 @@ public class TestConceptualAPI {
     Job<String> job = new ExampleJob<String>("TestJob", "TestData");
     JobRequest<String> req = new JobRequest<String>(job);
 
-    // get job response
     JobResponse<String> resp = conceptualApi.submitJob(req);
 
     // testing ExampleJob constructor and getter
@@ -43,6 +51,9 @@ public class TestConceptualAPI {
     assertEquals("TestResult", resp.getResult());
   }
 
+  /**
+   * Tests the checkStatus method of the conceptual API
+   */
   @Test
   void testCheckStatus() {
     Job<String> job = new ExampleJob<String>("TestJob", "TestData");
