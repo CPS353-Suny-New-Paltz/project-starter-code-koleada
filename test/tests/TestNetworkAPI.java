@@ -13,9 +13,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import apiImplementations.ConceptualAPI;
-import apiImplementations.NetworkAPI;
-import apiImplementations.ProcessAPI;
+import api.implementations.ConceptualAPI;
+import api.implementations.NetworkAPI;
+import api.implementations.ProcessAPI;
 import network.api.LoadDataRequest;
 import network.api.LoadDataResponse;
 import network.api.LoadProfileRequest;

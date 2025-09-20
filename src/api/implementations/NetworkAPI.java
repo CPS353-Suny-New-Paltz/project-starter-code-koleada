@@ -1,4 +1,4 @@
-package apiImplementations;
+package api.implementations;
 
 import java.util.UUID;
 

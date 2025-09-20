@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import apiImplementations.ConceptualAPI;
+import api.implementations.ConceptualAPI;
 import conceptual.api.ConceptualApi;
 import conceptual.api.ExampleJob;
 import conceptual.api.Job;
