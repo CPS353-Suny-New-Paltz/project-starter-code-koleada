@@ -1,12 +1,12 @@
 package tests;
 
-
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import network.api.Delimiter;
 import network.api.LoadDataRequest;
 import network.api.LoadDataResponse;
-
 import network.api.LoginRequest;
 import network.api.LoginResponse;
 import network.api.LogoutRequest;
@@ -15,7 +15,6 @@ import network.api.NetworkApi;
 import network.api.StoreDataRequest;
 import network.api.StoreDataResponse;
 import shared.stuff.ApiStatus;
-
 import shared.stuff.Resource;
 import shared.stuff.ResourceType;
 
@@ -49,7 +48,6 @@ public class InMemoryDataStore implements NetworkApi {
     } else {
       delimiter = req.getDelimiter();
     }
-
 
     List payloadStr = req.getPayload();
 
@@ -112,6 +110,5 @@ public class InMemoryDataStore implements NetworkApi {
   public LogoutResponse logout(LogoutRequest req) {
     return new LogoutResponse(ApiStatus.ERROR);
   }
-
 
 }
