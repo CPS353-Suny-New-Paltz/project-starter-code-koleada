@@ -47,8 +47,10 @@ public class ComputeEngineIntegrationTest {
     LoadDataResponse loadResp = dataStore.loadData(loadReq);
 
     // Verify that loaded data matches inputConfig
+
     List loadedData = loadResp.getPayload();
     String result = (String) loadedData.get(0);
+
     String expectedString = "1" + Delimiter.defaultDelimiter().getValue() + "10"
         + Delimiter.defaultDelimiter().getValue() + "25";
 
@@ -56,7 +58,9 @@ public class ComputeEngineIntegrationTest {
     // sure what the ConceptualAPI / computation section of compute engine will
     // even do. May have to rework entire ConceptualAPI later, I had almsot no
     // idea what its supposed to do
+
     assertEquals(expectedString, result);
+
 
     //
     // Simulate storing processed data
@@ -72,8 +76,10 @@ public class ComputeEngineIntegrationTest {
 
     StoreDataResponse storeResp = dataStore.storeData(storeReq);
 
+
     // Validate API status
     assertEquals(ApiStatus.SUCCESS, storeResp.getStatus());
+
 
   }
 }
