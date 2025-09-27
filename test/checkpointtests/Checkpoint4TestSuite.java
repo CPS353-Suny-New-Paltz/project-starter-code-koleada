@@ -1,4 +1,4 @@
-package project.checkpointtests;
+package checkpointtests;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
