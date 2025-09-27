@@ -3,26 +3,23 @@ package conceptual.api;
 /**
  * A response from the computation area about a job's execution status and
  * result
- * 
- * @param <R>
- *          the type of the result produced by the job
  */
-public class JobResponse<R> {
+public class JobResponse {
   public String jobId;
   public JobStatus status;
-  public R result;
+  public int result;
   public String errorMessage;
 
   // no error message constructor
-  public JobResponse(String jobId, JobStatus status, R result) {
+  public JobResponse(String jobId, JobStatus status, int result2) {
     this.jobId = jobId;
     this.status = status;
-    this.result = result;
+    this.result = result2;
     this.errorMessage = null;
   }
 
   // constructor with error message
-  public JobResponse(String jobId, JobStatus status, R result,
+  public JobResponse(String jobId, JobStatus status, int result,
       String errorMessage) {
     this.jobId = jobId;
     this.status = status;
@@ -38,7 +35,7 @@ public class JobResponse<R> {
     return status;
   }
 
-  public R getResult() {
+  public int getResult() {
     return result;
   }
 

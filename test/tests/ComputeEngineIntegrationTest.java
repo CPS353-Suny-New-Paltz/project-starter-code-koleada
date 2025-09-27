@@ -15,6 +15,7 @@ import network.api.LoadDataResponse;
 import network.api.StoreDataRequest;
 import network.api.StoreDataResponse;
 import shared.stuff.ApiStatus;
+import shared.stuff.DataBatch;
 import shared.stuff.Resource;
 import shared.stuff.ResourceType;
 
@@ -41,7 +42,7 @@ public class ComputeEngineIntegrationTest {
     LoadDataResponse loadResp = dataStore.loadData(loadReq);
 
     // Verify that loaded data matches inputConfig
-    String loadedString = new String(loadResp.getPayload());
+    DataBatch<List> loadedData = loadResp.getPayload();
     String expectedString = "1" + Delimiter.defaultDelimiter().getValue() + "10"
         + Delimiter.defaultDelimiter().getValue() + "25";
 
@@ -49,7 +50,7 @@ public class ComputeEngineIntegrationTest {
     // sure what the ConceptualAPI / computation section of compute engine will
     // even do. May have to rework entire ConceptualAPI later, I had almsot no
     // idea what its supposed to do
-    assertEquals(expectedString, loadedString);
+    assertEquals(expectedString, loadedData);
 
     //
     // Simulate storing processed data

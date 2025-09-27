@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.security.NoSuchAlgorithmException;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -32,15 +34,18 @@ public class TestConceptualAPI {
 
   /**
    * Tests the submitJob method of the conceptual API
+   * 
+   * @throws NoSuchAlgorithmException
    */
   @Test
-  void testSubmitJob() {
+  void testSubmitJob() throws NoSuchAlgorithmException {
 
     // create ExampleJob and use it to create Jobrequest
-    Job<String> job = new ExampleJob<String>("TestJob", "TestData");
-    JobRequest<String> req = new JobRequest<String>(job);
+    Job job = new ExampleJob("TestJob", 5);
+    JobRequest req = new JobRequest(job);
 
-    JobResponse<String> resp = conceptualApi.submitJob(req);
+    JobResponse resp = conceptualApi
+        .performComputation(req.getJob().getInput());
 
     // testing ExampleJob constructor and getter
     assertEquals("TestData", job.getInput());
@@ -56,10 +61,10 @@ public class TestConceptualAPI {
    */
   @Test
   void testCheckStatus() {
-    Job<String> job = new ExampleJob<String>("TestJob", "TestData");
+    Job job = new ExampleJob("TestJob", 5);
     String jobId = job.getJobId();
 
-    JobResponse<String> response = conceptualApi.checkStatus(jobId);
+    JobResponse response = conceptualApi.checkStatus(jobId);
 
     assertNotNull(response);
     assertNotNull(response.getJobId());

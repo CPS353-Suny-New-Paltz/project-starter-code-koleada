@@ -3,6 +3,9 @@ package tests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +24,7 @@ import shared.stuff.ResourceType;
  */
 public class TestProcessAPI {
 
-  private ProcessAPI<?> processApi;
+  private ProcessAPI processApi;
   private Resource dummyResource;
 
   /**
@@ -31,7 +34,7 @@ public class TestProcessAPI {
   void setup() {
     // create dummy resource for ProcessAPI
     dummyResource = new Resource(ResourceType.DATABASE, "db://mydb");
-    processApi = new ProcessAPI<>(dummyResource);
+    processApi = new ProcessAPI(dummyResource);
   }
 
   /**
@@ -42,7 +45,7 @@ public class TestProcessAPI {
     // tests the ProcessAPI.load() method
     LoadRequest request = new LoadRequest(processApi.getResource());
 
-    LoadResponse<?> response = processApi.load(request);
+    LoadResponse response = processApi.load(request);
 
     assertNotNull(response);
     assertEquals(ApiStatus.ERROR, response.getStatus());
@@ -57,9 +60,12 @@ public class TestProcessAPI {
   @Test
   void testStore() {
     // tsets the ProcessAPI.store() method
-    DataBatch<String> batch = new DataBatch<>("test data");
-    StoreRequest<DataBatch<String>> request = new StoreRequest(
-        processApi.getResource(), batch);
+    ArrayList<Integer> list = new ArrayList<Integer>();
+    list.add(2);
+    list.add(4);
+
+    DataBatch<List> batch = new DataBatch<List>(list);
+    StoreRequest request = new StoreRequest(processApi.getResource(), batch);
 
     StoreResponse response = processApi.store(request);
 

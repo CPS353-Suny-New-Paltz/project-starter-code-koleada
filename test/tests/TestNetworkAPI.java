@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -137,7 +138,7 @@ public class TestNetworkAPI {
   @Test
   public void testStoreData() {
     StoreDataRequest req = new StoreDataRequest(UUID.randomUUID().toString(),
-        networkApi.getResource(), "test".getBytes());
+        networkApi.getResource(), new DataBatch<List>());
 
     assertEquals(ResourceType.DATABASE, req.getDestination().getType());
 
@@ -174,7 +175,7 @@ public class TestNetworkAPI {
   void testStoreDataDelegatesToProcessApi() {
     ProcessAPI mockProcess = networkApi.getReadWrite();
     StoreRequest req = new StoreRequest(networkApi.getResource(),
-        new DataBatch<>("testData".getBytes()));
+        new DataBatch<>());
     StoreResponse resp = mockProcess.store(req);
 
     when(mockProcess.store(req)).thenReturn(resp);
@@ -185,7 +186,7 @@ public class TestNetworkAPI {
     // StoreDataResponse for the user
     StoreDataRequest networkReq = new StoreDataRequest(
         UUID.randomUUID().toString(), networkApi.getResource(),
-        "test".getBytes());
+        new DataBatch<List>());
     StoreDataResponse networkResp = networkApi.storeData(networkReq);
 
     // this will fail now

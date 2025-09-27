@@ -1,6 +1,7 @@
 package process.api;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import project.annotations.ProcessAPIPrototype;
 import shared.stuff.DataBatch;
@@ -29,7 +30,7 @@ public class ProcessApiPrototype {
     numbers.add(3);
     numbers.add(4);
     numbers.add(5);
-    DataBatch<ArrayList<Integer>> data = new DataBatch<>(numbers);
+    DataBatch<List> data = new DataBatch<>(numbers);
 
     // Store data in a resource
     Resource rec = new Resource(ResourceType.DATABASE,

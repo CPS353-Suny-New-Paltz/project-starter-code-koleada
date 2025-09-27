@@ -1,7 +1,10 @@
 package network.api;
 
+import java.util.List;
+
 import project.annotations.NetworkAPIPrototype;
 import shared.stuff.ApiStatus;
+import shared.stuff.DataBatch;
 import shared.stuff.Resource;
 import shared.stuff.ResourceType;
 
@@ -37,7 +40,8 @@ public class NetworkApiPrototye {
     Resource resource = new Resource(type, "db://myDb");
 
     StoreDataResponse stoResponse = api.storeData(
-        new StoreDataRequest(sessionToken, resource, "Hello World".getBytes()));
+
+        new StoreDataRequest(sessionToken, resource, new DataBatch<List>()));
 
     // check is store was successful
     if (!(stoResponse.getStatus() == ApiStatus.SUCCESS)

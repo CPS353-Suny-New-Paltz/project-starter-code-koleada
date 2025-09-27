@@ -1,5 +1,7 @@
 package process.api;
 
+import java.util.List;
+
 import shared.stuff.DataBatch;
 import shared.stuff.Resource;
 
@@ -10,12 +12,12 @@ import shared.stuff.Resource;
  * @param <T>
  *          Generic for the DataBatch
  */
-public class StoreRequest<T> {
+public class StoreRequest {
 
   private final Resource destination;
-  private final DataBatch<T> data;
+  private final DataBatch<List> data;
 
-  public StoreRequest(Resource destination, DataBatch<T> data) {
+  public StoreRequest(Resource destination, DataBatch<List> data) {
     this.destination = destination;
     this.data = data;
   }
@@ -23,7 +25,7 @@ public class StoreRequest<T> {
   public Resource getDestination() {
     return destination;
   }
-  public DataBatch<T> getData() {
+  public DataBatch<List> getData() {
     return data;
   }
 }

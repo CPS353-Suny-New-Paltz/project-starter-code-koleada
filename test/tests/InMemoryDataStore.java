@@ -1,5 +1,6 @@
 package tests;
 
+import java.util.List;
 import java.util.UUID;
 
 import network.api.Delimiter;
@@ -50,14 +51,10 @@ public class InMemoryDataStore implements NetworkApi {
       delimiter = req.getDelimiter();
     }
 
-    String payloadStr = new String(req.getPayload());
-    String[] values = payloadStr.split(delimiter.getValue());
+    DataBatch<List> payloadStr = req.getPayload();
 
     // Clear old output and write new data
     outputConfig.setOutputData(new java.util.ArrayList<>());
-    for (String v : values) {
-      outputConfig.writeData(v.trim());
-    }
 
     return new StoreDataResponse(ApiStatus.SUCCESS,
         new Resource(ResourceType.CUSTOM, new DataBatch<>(outputConfig)),
@@ -92,7 +89,7 @@ public class InMemoryDataStore implements NetworkApi {
     }
 
     // create byte array out of our string builder
-    byte[] data = builder.toString().getBytes();
+    DataBatch<List> data = new DataBatch(builder.toString().getBytes());
 
     // return the byte[], no resource is needed because we would read from user
     // supplied resource

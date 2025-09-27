@@ -1,18 +1,21 @@
 package network.api;
 
+import java.util.List;
+
 import shared.stuff.ApiStatus;
+import shared.stuff.DataBatch;
 
 /**
  * Response to a LoadDataRequest
  */
 public final class LoadDataResponse {
   private final ApiStatus status;
-  private final byte[] payload; // optional if error
+  private final DataBatch<List> payload; // optional if error
   private final Delimiter delimiter; // optional
   private final String errorMessage; // optional
 
-  public LoadDataResponse(ApiStatus status, byte[] payload, Delimiter delimiter,
-      String errorMessage) {
+  public LoadDataResponse(ApiStatus status, DataBatch<List> payload,
+      Delimiter delimiter, String errorMessage) {
     this.status = status;
     this.payload = payload;
     this.delimiter = delimiter;
@@ -32,7 +35,7 @@ public final class LoadDataResponse {
     return this.delimiter;
   }
 
-  public byte[] getPayload() {
+  public DataBatch<List> getPayload() {
     return this.payload;
   }
 
@@ -45,7 +48,8 @@ public final class LoadDataResponse {
    *          used in the data
    * @return LoadDataResponse
    */
-  public static LoadDataResponse success(byte[] payload, Delimiter delimiter) {
+  public static LoadDataResponse success(DataBatch<List> payload,
+      Delimiter delimiter) {
     return new LoadDataResponse(ApiStatus.SUCCESS, payload, delimiter, null);
   }
 
