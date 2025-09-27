@@ -3,7 +3,6 @@ package network.api;
 import java.util.List;
 
 import shared.stuff.ApiStatus;
-import shared.stuff.DataBatch;
 
 /**
  * 
@@ -11,10 +10,10 @@ import shared.stuff.DataBatch;
  */
 public class ComputationResponse {
   private final ApiStatus status;
-  private final DataBatch<List> results;
+  private final List results;
   private final String message;
 
-  public ComputationResponse(ApiStatus status, DataBatch<List> resultBatch,
+  public ComputationResponse(ApiStatus status, List resultBatch,
       String message) {
     this.status = status;
     this.results = resultBatch;
@@ -25,7 +24,7 @@ public class ComputationResponse {
     return status;
   }
 
-  public DataBatch<List> getResults() {
+  public List getResults() {
     return results;
   }
 

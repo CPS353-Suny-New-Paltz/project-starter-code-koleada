@@ -13,7 +13,7 @@ import shared.stuff.Pbkdf2;
 /**
  * Implementation of the ConceptualApi interface
  */
-public class ConceptualAPI<T> implements ConceptualApi {
+public class ConceptualAPI implements ConceptualApi {
 
   // Tracks status of each job jobId -> JobStatus
   private Map<String, JobStatus> jobStatuses;

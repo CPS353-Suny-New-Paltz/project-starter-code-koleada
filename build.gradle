@@ -28,9 +28,5 @@ dependencies {
 
 test {
     useJUnitPlatform()
-    filter {
-         excludeTestsMatching "tests.TestNetworkAPI.testLoadDataDelegatesToProcessApi"
-         excludeTestsMatching "tests.TestNetworkAPI.testStoreDataDelegatesToProcessApi"
-         excludeTestsMatching "tests.ComputeEngineIntegrationTest"
-    }
+    
 }

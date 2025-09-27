@@ -1,13 +1,12 @@
 package tests;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import network.api.Delimiter;
 import network.api.LoadDataRequest;
 import network.api.LoadDataResponse;
-import network.api.LoadProfileRequest;
-import network.api.LoadProfileResponse;
 import network.api.LoginRequest;
 import network.api.LoginResponse;
 import network.api.LogoutRequest;
@@ -16,7 +15,6 @@ import network.api.NetworkApi;
 import network.api.StoreDataRequest;
 import network.api.StoreDataResponse;
 import shared.stuff.ApiStatus;
-import shared.stuff.DataBatch;
 import shared.stuff.Resource;
 import shared.stuff.ResourceType;
 
@@ -51,13 +49,14 @@ public class InMemoryDataStore implements NetworkApi {
       delimiter = req.getDelimiter();
     }
 
-    DataBatch<List> payloadStr = req.getPayload();
+    List payloadStr = req.getPayload();
 
     // Clear old output and write new data
     outputConfig.setOutputData(new java.util.ArrayList<>());
 
-    return new StoreDataResponse(ApiStatus.SUCCESS,
-        new Resource(ResourceType.CUSTOM, new DataBatch<>(outputConfig)),
+    List out = new TestOutputConfig().getOutputData();
+
+    return new StoreDataResponse(ApiStatus.SUCCESS, resource,
         "Data stored successfully");
   }
 
@@ -89,7 +88,8 @@ public class InMemoryDataStore implements NetworkApi {
     }
 
     // create byte array out of our string builder
-    DataBatch<List> data = new DataBatch(builder.toString().getBytes());
+    List<String> data = new ArrayList<String>();
+    data.add(builder.toString());
 
     // return the byte[], no resource is needed because we would read from user
     // supplied resource
@@ -109,9 +109,4 @@ public class InMemoryDataStore implements NetworkApi {
     return new LogoutResponse(ApiStatus.ERROR);
   }
 
-  @Override
-  public LoadProfileResponse loadProfile(LoadProfileRequest req) {
-    return new LoadProfileResponse(UUID.randomUUID().toString(), "testUser",
-        ApiStatus.ERROR);
-  }
 }

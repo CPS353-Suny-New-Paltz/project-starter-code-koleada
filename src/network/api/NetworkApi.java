@@ -27,14 +27,6 @@ public interface NetworkApi {
   LogoutResponse logout(LogoutRequest req);
 
   /**
-   * Handles loading and returning a users profile
-   * 
-   * @param LoadProfileRequest
-   * @return LoadProfileResponse
-   */
-  LoadProfileResponse loadProfile(LoadProfileRequest req);
-
-  /**
    * Facilitates the storing of user submitted data into a user specified source
    * 
    * @param StoreDataRequest

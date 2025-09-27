@@ -9,8 +9,6 @@ import network.api.ComputationResponse;
 import network.api.Delimiter;
 import network.api.LoadDataRequest;
 import network.api.LoadDataResponse;
-import network.api.LoadProfileRequest;
-import network.api.LoadProfileResponse;
 import network.api.LoginRequest;
 import network.api.LoginResponse;
 import network.api.LogoutRequest;
@@ -23,7 +21,6 @@ import process.api.LoadResponse;
 import process.api.StoreRequest;
 import process.api.StoreResponse;
 import shared.stuff.ApiStatus;
-import shared.stuff.DataBatch;
 import shared.stuff.Resource;
 
 /**
@@ -57,16 +54,10 @@ public class NetworkAPI implements NetworkApi {
   }
 
   @Override
-  public LoadProfileResponse loadProfile(LoadProfileRequest req) {
-    return new LoadProfileResponse(UUID.randomUUID().toString(), "testUser",
-        ApiStatus.ERROR);
-  }
-
-  @Override
   public StoreDataResponse storeData(StoreDataRequest req) {
 
     StoreResponse resp = readWrite.store(new StoreRequest(req.getDestination(),
-        new DataBatch(req.getPayload())));
+        req.getPayload(), req.getDelimiter()));
     return new StoreDataResponse(resp.getStatus(), req.getDestination(),
         resp.getMessage());
 
@@ -74,7 +65,8 @@ public class NetworkAPI implements NetworkApi {
 
   @Override
   public LoadDataResponse loadData(LoadDataRequest req) {
-    LoadResponse resp = readWrite.load(new LoadRequest(req.getSource()));
+    LoadResponse resp = readWrite
+        .load(new LoadRequest(req.getSource(), req.getDelimiter()));
 
     return new LoadDataResponse(resp.getStatus(), resp.getData(),
         defaultDelimiter, resp.getMessage());
@@ -87,16 +79,16 @@ public class NetworkAPI implements NetworkApi {
   public ComputationResponse compute(ComputationRequest request) {
     try {
       // Load integers from input resource
-      LoadResponse loadResp = readWrite
-          .load(new LoadRequest(request.getInputResource()));
+      LoadResponse loadResp = readWrite.load(
+          new LoadRequest(request.getInputResource(), request.getDelimiter()));
       if (loadResp.getStatus() != ApiStatus.SUCCESS) {
-        return new ComputationResponse(ApiStatus.ERROR, new DataBatch<List>(),
+        return new ComputationResponse(ApiStatus.ERROR, new ArrayList<>(),
             "Failed to load input data");
       }
 
       // expect the input integers to be in a DataBatch<List<Integer>>, provided
       // in LoadResponse
-      List<Integer> inputs = (List<Integer>) loadResp.getData().getDataSource();
+      List<Integer> inputs = loadResp.getData();
       List<Integer> results = new ArrayList<>();
 
       // Run computation for each input
@@ -105,12 +97,12 @@ public class NetworkAPI implements NetworkApi {
       }
 
       // Store results in output resource
-      DataBatch<List> resultBatch = new DataBatch<>(results);
-      StoreResponse storeResp = readWrite
-          .store(new StoreRequest(request.getOutputResource(), resultBatch));
+      List resultBatch = new ArrayList<>(results);
+      StoreResponse storeResp = readWrite.store(new StoreRequest(
+          request.getOutputResource(), resultBatch, request.getDelimiter()));
 
       if (storeResp.getStatus() != ApiStatus.SUCCESS) {
-        return new ComputationResponse(ApiStatus.ERROR, new DataBatch<List>(),
+        return new ComputationResponse(ApiStatus.ERROR, new ArrayList<>(),
             "Failed to store results");
       }
 
@@ -120,7 +112,7 @@ public class NetworkAPI implements NetworkApi {
           "Computation completed");
 
     } catch (Exception e) {
-      return new ComputationResponse(ApiStatus.ERROR, new DataBatch<List>(),
+      return new ComputationResponse(ApiStatus.ERROR, new ArrayList<>(),
           "Error: " + e.getMessage());
     }
   }

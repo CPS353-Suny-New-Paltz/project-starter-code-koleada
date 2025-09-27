@@ -10,12 +10,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import api.implementations.ProcessAPI;
+import network.api.Delimiter;
 import process.api.LoadRequest;
 import process.api.LoadResponse;
 import process.api.StoreRequest;
 import process.api.StoreResponse;
 import shared.stuff.ApiStatus;
-import shared.stuff.DataBatch;
 import shared.stuff.Resource;
 import shared.stuff.ResourceType;
 
@@ -43,13 +43,15 @@ public class TestProcessAPI {
   @Test
   void testLoad() {
     // tests the ProcessAPI.load() method
-    LoadRequest request = new LoadRequest(processApi.getResource());
+    LoadRequest request = new LoadRequest(processApi.getResource(),
+        Delimiter.COMMA);
 
     LoadResponse response = processApi.load(request);
 
     assertNotNull(response);
     assertEquals(ApiStatus.ERROR, response.getStatus());
-    assertEquals("Not Implemented", response.getMessage());
+    assertEquals("Unsupported resource type or missing URI",
+        response.getMessage());
     assertNotNull(response.getData()); // getData() should just return our
                                        // buffer
   }
@@ -64,14 +66,16 @@ public class TestProcessAPI {
     list.add(2);
     list.add(4);
 
-    DataBatch<List> batch = new DataBatch<List>(list);
-    StoreRequest request = new StoreRequest(processApi.getResource(), batch);
+    List batch = new ArrayList<>(list);
+    StoreRequest request = new StoreRequest(processApi.getResource(), batch,
+        Delimiter.COMMA);
 
     StoreResponse response = processApi.store(request);
 
     assertNotNull(response);
     assertEquals(ApiStatus.ERROR, response.getStatus());
-    assertEquals("Not Implemented", response.getMessage());
+    assertEquals("Unsupported resource type or missing URI",
+        response.getMessage());
   }
 
   /**
