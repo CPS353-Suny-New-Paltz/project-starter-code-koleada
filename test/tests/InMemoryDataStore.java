@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import network.api.Delimiter;
+
 import process.api.LoadRequest;
 import process.api.LoadResponse;
 import process.api.ProcessApi;
@@ -30,6 +31,7 @@ public class InMemoryDataStore implements ProcessApi {
 
   @Override
   public LoadResponse load(LoadRequest req) {
+
     Delimiter delimiter;
     if (req.getDelimiter() == null) {
       delimiter = defaultDelimiter;
@@ -50,6 +52,7 @@ public class InMemoryDataStore implements ProcessApi {
     }
 
     // create byte array out of our string builder
+
     List<String> data = new ArrayList<String>();
     data.add(builder.toString());
 
@@ -76,6 +79,7 @@ public class InMemoryDataStore implements ProcessApi {
     List out = new TestOutputConfig().getOutputData();
 
     return new StoreResponse(ApiStatus.SUCCESS, "Data stored successfully");
+
   }
 
 }
