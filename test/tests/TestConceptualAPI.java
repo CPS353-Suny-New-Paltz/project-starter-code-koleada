@@ -29,7 +29,7 @@ public class TestConceptualAPI {
   }
 
   /**
-   * Tests the submitJob method of the conceptual API
+   * Tests the performComputation method of the conceptual API
    * 
    * @throws NoSuchAlgorithmException
    */
