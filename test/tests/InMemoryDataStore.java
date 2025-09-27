@@ -79,8 +79,7 @@ public class InMemoryDataStore implements NetworkApi {
       delimiter = req.getDelimiter();
     }
 
-    // our resource contains a DataBatch wrapper around our TestInputConfig
-    // (actual data)
+    // our resources 'data' is the inputConfig
     TestInputConfig input = resource.getData();
 
     // read data from InputConfig, append the delimiter
