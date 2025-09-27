@@ -10,7 +10,7 @@ import shared.stuff.ApiStatus;
  */
 public class ComputationResponse {
   private final ApiStatus status;
-  private final List results;
+  private final List<Integer> results;
   private final String message;
 
   public ComputationResponse(ApiStatus status, List resultBatch,
