@@ -54,8 +54,9 @@ public class Pbkdf2Example {
    *           if SHA-256 is not supported
    */
   public static void main(String[] args) throws NoSuchAlgorithmException {
-    int input = 12345;
-    int result = compute(input);
-    System.out.println(result);
+
+    int input = 5;
+    System.out.println(Pbkdf2.compute(input));
+
   }
 }

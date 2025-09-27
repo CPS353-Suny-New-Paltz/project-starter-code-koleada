@@ -1,5 +1,7 @@
 package conceptual.api;
 
+import java.security.NoSuchAlgorithmException;
+
 import project.annotations.ConceptualAPI;
 
 /**
@@ -9,20 +11,23 @@ import project.annotations.ConceptualAPI;
 public interface ConceptualApi<T> {
 
   /**
-   * Submits a job request to the computation area of the computation engine
-   * 
-   * @param JobRequest
-   *          the job request to submit
-   * @return JobResponse indicating the status of the job
-   */
-  JobResponse<T> submitJob(JobRequest<T> request);
-
-  /**
    * Checks the status of a job that has already been finished
    * 
    * @param jobId
    * 
-   * @return JobResponse containing the status
+   * @return JobResponse containing the status, result will always be -1 for
+   *         status checks
    */
-  JobResponse<T> checkStatus(String jobId);
+  JobResponse checkStatus(String jobId);
+
+  /**
+   * Performs the actual computations
+   * 
+   * @param input
+   *          to the computation
+   * @return result from the computation, -1 if computation failed
+   * @throws NoSuchAlgorithmException
+   */
+  public JobResponse performComputation(int input)
+      throws NoSuchAlgorithmException;
 }

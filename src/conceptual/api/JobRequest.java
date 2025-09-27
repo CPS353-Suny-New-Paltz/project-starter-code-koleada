@@ -6,14 +6,14 @@ package conceptual.api;
  * @param <T>
  *          the type of input data for the job
  */
-public class JobRequest<T> {
-  public Job<T> job;
+public class JobRequest {
+  public Job job;
 
-  public JobRequest(Job<T> job) {
+  public JobRequest(Job job) {
     this.job = job;
   }
 
-  public Job<T> getJob() {
+  public Job getJob() {
     return job;
   }
 }

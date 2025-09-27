@@ -1,5 +1,6 @@
 package network.api;
 
+import java.util.List;
 import java.util.Objects;
 
 import shared.stuff.Resource;
@@ -10,21 +11,21 @@ import shared.stuff.Resource;
 public final class StoreDataRequest {
   private final String sessionToken;
   private final Resource destination;
-  private final byte[] payload;
+  private final List payload;
   private final Delimiter delimiter;
 
   public StoreDataRequest(String sessionToken, Resource destination,
-      byte[] payload, Delimiter delimiter) {
+      List payload, Delimiter delimiter) {
     this.sessionToken = Objects.requireNonNull(sessionToken);
     this.destination = Objects.requireNonNull(destination);
     this.payload = Objects.requireNonNull(payload);
     this.delimiter = delimiter;
   }
   public StoreDataRequest(String sessionToken, Resource destination,
-      byte[] payload) {
+      List dataBatch) {
     this.sessionToken = Objects.requireNonNull(sessionToken);
     this.destination = Objects.requireNonNull(destination);
-    this.payload = Objects.requireNonNull(payload);
+    this.payload = Objects.requireNonNull(dataBatch);
     this.delimiter = Delimiter.defaultDelimiter();
   }
 
@@ -34,7 +35,7 @@ public final class StoreDataRequest {
   public Resource getDestination() {
     return destination;
   }
-  public byte[] getPayload() {
+  public List getPayload() {
     return payload;
   }
   public Delimiter getDelimiter() {

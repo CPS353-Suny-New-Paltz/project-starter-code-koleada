@@ -3,16 +3,19 @@ package tests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import api.implementations.ProcessAPI;
+import network.api.Delimiter;
 import process.api.LoadRequest;
 import process.api.LoadResponse;
 import process.api.StoreRequest;
 import process.api.StoreResponse;
 import shared.stuff.ApiStatus;
-import shared.stuff.DataBatch;
 import shared.stuff.Resource;
 import shared.stuff.ResourceType;
 
@@ -21,7 +24,7 @@ import shared.stuff.ResourceType;
  */
 public class TestProcessAPI {
 
-  private ProcessAPI<?> processApi;
+  private ProcessAPI processApi;
   private Resource dummyResource;
 
   /**
@@ -31,7 +34,7 @@ public class TestProcessAPI {
   void setup() {
     // create dummy resource for ProcessAPI
     dummyResource = new Resource(ResourceType.DATABASE, "db://mydb");
-    processApi = new ProcessAPI<>(dummyResource);
+    processApi = new ProcessAPI(dummyResource);
   }
 
   /**
@@ -40,13 +43,15 @@ public class TestProcessAPI {
   @Test
   void testLoad() {
     // tests the ProcessAPI.load() method
-    LoadRequest request = new LoadRequest(processApi.getResource());
+    LoadRequest request = new LoadRequest(processApi.getResource(),
+        Delimiter.COMMA);
 
-    LoadResponse<?> response = processApi.load(request);
+    LoadResponse response = processApi.load(request);
 
     assertNotNull(response);
     assertEquals(ApiStatus.ERROR, response.getStatus());
-    assertEquals("Not Implemented", response.getMessage());
+    assertEquals("Unsupported resource type or missing URI",
+        response.getMessage());
     assertNotNull(response.getData()); // getData() should just return our
                                        // buffer
   }
@@ -57,15 +62,20 @@ public class TestProcessAPI {
   @Test
   void testStore() {
     // tsets the ProcessAPI.store() method
-    DataBatch<String> batch = new DataBatch<>("test data");
-    StoreRequest<DataBatch<String>> request = new StoreRequest(
-        processApi.getResource(), batch);
+    ArrayList<Integer> list = new ArrayList<Integer>();
+    list.add(2);
+    list.add(4);
+
+    List batch = new ArrayList<>(list);
+    StoreRequest request = new StoreRequest(processApi.getResource(), batch,
+        Delimiter.COMMA);
 
     StoreResponse response = processApi.store(request);
 
     assertNotNull(response);
     assertEquals(ApiStatus.ERROR, response.getStatus());
-    assertEquals("Not Implemented", response.getMessage());
+    assertEquals("Unsupported resource type or missing URI",
+        response.getMessage());
   }
 
   /**

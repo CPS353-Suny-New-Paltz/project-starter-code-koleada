@@ -1,9 +1,10 @@
 package process.api;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import network.api.Delimiter;
 import project.annotations.ProcessAPIPrototype;
-import shared.stuff.DataBatch;
 import shared.stuff.Resource;
 import shared.stuff.ResourceType;
 
@@ -29,13 +30,13 @@ public class ProcessApiPrototype {
     numbers.add(3);
     numbers.add(4);
     numbers.add(5);
-    DataBatch<ArrayList<Integer>> data = new DataBatch<>(numbers);
+    List data = numbers;
 
     // Store data in a resource
     Resource rec = new Resource(ResourceType.DATABASE,
         "db://myDatabaseToWrite");
 
-    StoreRequest storeReq = new StoreRequest(rec, data);
+    StoreRequest storeReq = new StoreRequest(rec, data, Delimiter.COMMA);
     StoreResponse storeResp = api.store(storeReq);
     System.out.println("Store status: " + storeResp.success());
     if (storeResp.getMessage() != null) {
@@ -46,7 +47,7 @@ public class ProcessApiPrototype {
     Resource rec2 = new Resource(ResourceType.DATABASE,
         "db://myDatabaseToRead");
 
-    LoadRequest loadReq = new LoadRequest(rec2);
+    LoadRequest loadReq = new LoadRequest(rec2, Delimiter.COMMA);
     LoadResponse loadResp = api.load(loadReq);
     System.out.println("Load status: " + loadResp.getStatus());
     if (loadResp.getMessage() != null) {

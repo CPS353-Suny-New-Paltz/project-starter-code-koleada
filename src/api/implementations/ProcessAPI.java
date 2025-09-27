@@ -1,49 +1,112 @@
 package api.implementations;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import network.api.Delimiter;
 import process.api.LoadRequest;
 import process.api.LoadResponse;
 import process.api.ProcessApi;
 import process.api.StoreRequest;
 import process.api.StoreResponse;
 import shared.stuff.ApiStatus;
-import shared.stuff.DataBatch;
 import shared.stuff.Resource;
+import shared.stuff.ResourceType;
 
 /**
  * Implementation of the ProcessApi interface
  */
-public class ProcessAPI<T> implements ProcessApi {
+public class ProcessAPI implements ProcessApi {
 
   // need to know which resource for storing and loading data
   private Resource resource;
 
-  private final DataBatch buffer; // A buffer if needed
-
   public ProcessAPI(Resource resource) {
     this.resource = resource;
-
-    // example buffer
-    this.buffer = new DataBatch<ArrayList<T>>(new ArrayList<T>());
   }
 
   @Override
-  public LoadResponse<T> load(LoadRequest request) {
-    // empty implementation returning failure and no data
-    return new LoadResponse<T>(ApiStatus.ERROR, buffer, "Not Implemented");
+  public LoadResponse load(LoadRequest request) {
+    Resource src = request.getSource();
+    if (src.getType() == ResourceType.FILE && src.getUri() != null) {
+      return loadFromFile(src, request.getDelimiter());
+    }
+    return new LoadResponse(ApiStatus.ERROR, new ArrayList<>(),
+        "Unsupported resource type or missing URI");
   }
 
   @Override
   public StoreResponse store(StoreRequest request) {
-    return new StoreResponse(ApiStatus.ERROR, "Not Implemented");
+    Resource dest = request.getDestination();
+    if (dest.getType() == ResourceType.FILE && dest.getUri() != null) {
+      return storeToFile(dest, request.getData(), request.getDelimiter());
+    }
+    return new StoreResponse(ApiStatus.ERROR,
+        "Unsupported resource type or missing URI");
+  }
+
+  /**
+   * Helper method to load data from a file
+   * 
+   * @param src,
+   *          Resource to read from
+   * @param delimiter
+   *          used to split data and add it to a List
+   * @return
+   */
+  private LoadResponse loadFromFile(Resource src, Delimiter delimiter) {
+    try {
+      String content = Files.readString(Paths.get(src.getUri()));
+      String[] tokens = content.split(delimiter.getValue());
+
+      List<Integer> data = Arrays.stream(tokens).map(String::trim)
+          .filter(s -> !s.isEmpty()).map(Integer::parseInt)
+          .collect(Collectors.toList());
+
+      return new LoadResponse(ApiStatus.SUCCESS, new ArrayList<>(data),
+          "Loaded successfully");
+    } catch (IOException | NumberFormatException e) {
+      return new LoadResponse(ApiStatus.ERROR, new ArrayList<>(),
+          "Failed to load: " + e.getMessage());
+    }
+
+  }
+
+  /**
+   * Helper method to store data to a file
+   * 
+   * @param dest
+   *          the Resource which describes the file we are to write to
+   * @param batch
+   *          DataBatch<List> the data we write to the file
+   * @param delimiter
+   *          added in between each data element
+   * @return
+   */
+  private StoreResponse storeToFile(Resource dest, List batch,
+      Delimiter delimiter) {
+    try {
+      List<?> payload = batch;
+      String joined = payload.stream().map(Object::toString)
+          .collect(Collectors.joining(delimiter.getValue()));
+
+      Files.writeString(Paths.get(dest.getUri()), joined);
+
+      return new StoreResponse(ApiStatus.SUCCESS, "Stored successfully");
+    } catch (IOException e) {
+      return new StoreResponse(ApiStatus.ERROR,
+          "Failed to store: " + e.getMessage());
+    }
+
   }
 
   public Resource getResource() {
     return resource;
-  }
-  public DataBatch getBuffer() {
-    return buffer;
   }
 
   public void setResource(Resource resource) {

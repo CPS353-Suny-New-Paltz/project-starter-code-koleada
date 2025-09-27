@@ -1,5 +1,7 @@
 package network.api;
 
+import java.util.ArrayList;
+
 import project.annotations.NetworkAPIPrototype;
 import shared.stuff.ApiStatus;
 import shared.stuff.Resource;
@@ -27,17 +29,13 @@ public class NetworkApiPrototye {
 
     String sessionToken = loginResp.getSessionToken();
 
-    // Load profile
-    LoadProfileResponse profileResp = api
-        .loadProfile(new LoadProfileRequest(sessionToken));
-    System.out.println("Profile loaded: " + profileResp.getDisplayName());
-
     // Store Data
     ResourceType type = ResourceType.DATABASE;
     Resource resource = new Resource(type, "db://myDb");
 
     StoreDataResponse stoResponse = api.storeData(
-        new StoreDataRequest(sessionToken, resource, "Hello World".getBytes()));
+
+        new StoreDataRequest(sessionToken, resource, new ArrayList<>()));
 
     // check is store was successful
     if (!(stoResponse.getStatus() == ApiStatus.SUCCESS)
