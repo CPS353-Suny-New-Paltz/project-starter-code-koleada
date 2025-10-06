@@ -50,7 +50,7 @@ public class InMemoryDataStore implements ProcessApi {
 
     List out = new TestOutputConfig().getOutputData();
 
-    return new StoreResponse(ApiStatus.SUCCESS, resource,s
+    return new StoreResponse(ApiStatus.SUCCESS, resource,
         "Data stored successfully");
   }
 

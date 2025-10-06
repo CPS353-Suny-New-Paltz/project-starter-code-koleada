@@ -52,8 +52,8 @@ public class TestProcessAPI {
     assertEquals(ApiStatus.ERROR, response.getStatus());
     assertEquals("Unsupported resource type or missing URI",
         response.getMessage());
-    assertNotNull(response.getData()); // getData() should just return our
-                                       // buffer
+    assertNotNull(response.getPayload()); // getData() should just return our
+    // buffer
   }
 
   /**
