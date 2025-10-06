@@ -8,15 +8,15 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import process.api.LoadResponse;
+import process.api.LoadRequest;
+import process.api.StoreRequest;
+import process.api.StoreResponse;
 
 import api.implementations.ConceptualAPI;
 import api.implementations.NetworkAPI;
 import conceptual.api.ConceptualApi;
 import network.api.Delimiter;
-import network.api.LoadDataRequest;
-import network.api.LoadDataResponse;
-import network.api.StoreDataRequest;
-import network.api.StoreDataResponse;
 import shared.stuff.ApiStatus;
 import shared.stuff.Resource;
 import shared.stuff.ResourceType;
@@ -36,15 +36,16 @@ public class ComputeEngineIntegrationTest {
 
     NetworkAPI net = new NetworkAPI();
     ConceptualApi con = new ConceptualAPI();
+    ProcessAPI proc = new ProcessAPI(null);
   }
 
   @Test
   void testComputeEngineIntegration() {
 
     // Simulate loading data
-    LoadDataRequest loadReq = new LoadDataRequest(UUID.randomUUID().toString(),
-        dataStore.resource); // no delimiter specified
-    LoadDataResponse loadResp = dataStore.loadData(loadReq);
+    LoadRequest loadReq = new LoadRequest(
+        dataStore.resource, Delimiter.defaultDelimiter()); 
+    LoadResponse loadResp = dataStore.loadData(loadReq);
 
     // Verify that loaded data matches inputConfig
 
@@ -69,12 +70,10 @@ public class ComputeEngineIntegrationTest {
     Resource<TestOutputConfig> outputSource = new Resource(ResourceType.CUSTOM,
         dataStore.outputConfig);
 
-    StoreDataRequest storeReq = new StoreDataRequest(
-        UUID.randomUUID().toString(), outputSource, loadResp.getPayload()); // no
-                                                                            // delimiter
-                                                                            // specified
+    StoreRequest storeReq = new StoreRequest(
+        outputSource, loadResp.getPayload(), Delimiter.defaultDelimiter()); 
 
-    StoreDataResponse storeResp = dataStore.storeData(storeReq);
+    StoreResponse storeResp = dataStore.storeData(storeReq);
 
 
     // Validate API status
