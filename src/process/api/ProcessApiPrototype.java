@@ -13,50 +13,46 @@ import shared.stuff.ResourceType;
  */
 public class ProcessApiPrototype {
 
-  /**
-   * The method that showcases the Process API functionality (storing and
-   * loading)
-   * 
-   * @param api
-   *          interface
-   */
-  @ProcessAPIPrototype
-  public void prototype(ProcessApi api) {
+	/**
+	 * The method that showcases the Process API functionality (storing and loading)
+	 * 
+	 * @param api interface
+	 */
+	@ProcessAPIPrototype
+	public void prototype(ProcessApi api) {
 
-    // create DataBatch (generic wrapper to hold data)
-    ArrayList<Integer> numbers = new ArrayList<>();
-    numbers.add(1);
-    numbers.add(2);
-    numbers.add(3);
-    numbers.add(4);
-    numbers.add(5);
-    List data = numbers;
+		// create DataBatch (generic wrapper to hold data)
+		ArrayList<Integer> numbers = new ArrayList<>();
+		numbers.add(1);
+		numbers.add(2);
+		numbers.add(3);
+		numbers.add(4);
+		numbers.add(5);
+		List data = numbers;
 
-    // Store data in a resource
-    Resource rec = new Resource(ResourceType.DATABASE,
-        "db://myDatabaseToWrite");
+		// Store data in a resource
+		Resource rec = new Resource(ResourceType.DATABASE, "db://myDatabaseToWrite");
 
-    StoreRequest storeReq = new StoreRequest(rec, data, Delimiter.COMMA);
-    StoreResponse storeResp = api.store(storeReq);
-    System.out.println("Store status: " + storeResp.success());
-    if (storeResp.getMessage() != null) {
-      System.out.println(storeResp.getMessage());
-    }
+		StoreRequest storeReq = new StoreRequest(rec, data, Delimiter.COMMA);
+		StoreResponse storeResp = api.store(storeReq);
+		System.out.println("Store status: " + storeResp.success());
+		if (storeResp.getMessage() != null) {
+			System.out.println(storeResp.getMessage());
+		}
 
-    // Load data from a resource
-    Resource rec2 = new Resource(ResourceType.DATABASE,
-        "db://myDatabaseToRead");
+		// Load data from a resource
+		Resource rec2 = new Resource(ResourceType.DATABASE, "db://myDatabaseToRead");
 
-    LoadRequest loadReq = new LoadRequest(rec2, Delimiter.COMMA);
-    LoadResponse loadResp = api.load(loadReq);
-    System.out.println("Load status: " + loadResp.getStatus());
-    if (loadResp.getMessage() != null) {
-      System.out.println(loadResp.getMessage());
-    }
-    if (loadResp.getData() != null) {
-      System.out.println("Loaded data: " + loadResp.getData());
-    } else {
-      System.out.println("No data returned.");
-    }
-  }
+		LoadRequest loadReq = new LoadRequest(rec2, Delimiter.COMMA);
+		LoadResponse loadResp = api.load(loadReq);
+		System.out.println("Load status: " + loadResp.getStatus());
+		if (loadResp.getMessage() != null) {
+			System.out.println(loadResp.getMessage());
+		}
+		if (loadResp.getPayload() != null) {
+			System.out.println("Loaded data: " + loadResp.getPayload());
+		} else {
+			System.out.println("No data returned.");
+		}
+	}
 }

@@ -14,7 +14,7 @@ public class LoadResponse {
 
 	public LoadResponse(ApiStatus status, List data, Delimiter delimiter, String message) {
 		this.status = status;
-		this.data = data;
+		this.payload = data;
 		this.delimiter = delimiter;
 		this.message = message;
 	}
