@@ -21,11 +21,11 @@ public class InMemoryDataStore implements ProcessApi {
 
   TestOutputConfig outputConfig;
   Delimiter defaultDelimiter = Delimiter.defaultDelimiter();
-  Resource<TestInputConfig> resource;
+  Resource<List<Integer>> resource;
 
   public InMemoryDataStore(TestInputConfig input, TestOutputConfig output) {
     this.outputConfig = output;
-    this.resource = new Resource(ResourceType.CUSTOM, input);
+    this.resource = new Resource(ResourceType.CUSTOM, input.inputData);
   }
 
   /**
@@ -43,12 +43,12 @@ public class InMemoryDataStore implements ProcessApi {
       delimiter = req.getDelimiter();
     }
 
-    List payloadStr = req.getPayload();
+    List<Integer> payloadStr = req.getPayload();
 
     // Clear old output and write new data
     outputConfig.setOutputData(new java.util.ArrayList<>());
 
-    List out = new TestOutputConfig().getOutputData();
+    List<String> out = new TestOutputConfig().getOutputData();
 
     return new StoreResponse(ApiStatus.SUCCESS, resource,
         "Data stored successfully");
@@ -69,13 +69,13 @@ public class InMemoryDataStore implements ProcessApi {
     }
 
     // our resources 'data' is the inputConfig
-    TestInputConfig input = resource.getData();
+    List input = resource.getData();
 
     // read data from InputConfig, append the delimiter
     StringBuilder builder = new StringBuilder();
-    for (int i = 0; i < input.inputData.size(); i++) {
-      builder.append(input.inputData.get(i));
-      if (i < input.inputData.size() - 1) {
+    for (int i = 0; i < input.size(); i++) {
+      builder.append(input.get(i));
+      if (i < input.size() - 1) {
         builder.append(delimiter.getValue());
       }
     }

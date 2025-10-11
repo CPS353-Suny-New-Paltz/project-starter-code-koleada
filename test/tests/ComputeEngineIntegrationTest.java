@@ -4,21 +4,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import process.api.LoadResponse;
-import process.api.LoadRequest;
-import process.api.StoreRequest;
-import process.api.StoreResponse;
 
 import api.implementations.ConceptualAPI;
 import api.implementations.NetworkAPI;
 import api.implementations.ProcessAPI;
-import conceptual.api.ConceptualApi;
+import network.api.ComputationRequest;
+import network.api.ComputationResponse;
 import network.api.Delimiter;
-import shared.stuff.ApiStatus;
+import process.api.LoadRequest;
+import process.api.LoadResponse;
 import shared.stuff.Resource;
 import shared.stuff.ResourceType;
 
@@ -28,6 +25,10 @@ public class ComputeEngineIntegrationTest {
   TestOutputConfig outputConfig;
   InMemoryDataStore dataStore;
 
+  NetworkAPI net = new NetworkAPI();
+  ConceptualAPI con = new ConceptualAPI();
+  ProcessAPI proc = new ProcessAPI(null);
+
   @BeforeEach
   void setUp() {
     // Initialize input with [1, 10, 25]
@@ -35,17 +36,17 @@ public class ComputeEngineIntegrationTest {
     outputConfig = new TestOutputConfig();
     dataStore = new InMemoryDataStore(inputConfig, outputConfig);
 
-    NetworkAPI net = new NetworkAPI();
-    ConceptualApi con = new ConceptualAPI();
-    ProcessAPI proc = new ProcessAPI(null);
   }
 
   @Test
   void testComputeEngineIntegration() {
 
+    net.setReadWrite(proc);
+    net.setCompute(con);
+
     // Simulate loading data
-    LoadRequest loadReq = new LoadRequest(
-        dataStore.resource, Delimiter.defaultDelimiter()); 
+    LoadRequest loadReq = new LoadRequest(dataStore.resource,
+        Delimiter.defaultDelimiter());
     LoadResponse loadResp = dataStore.loadData(loadReq);
 
     // Verify that loaded data matches inputConfig
@@ -63,23 +64,20 @@ public class ComputeEngineIntegrationTest {
 
     assertEquals(expectedString, result);
 
-
-    //
     // Simulate storing processed data
 
     // create new resource using outputConfig
-    Resource<TestOutputConfig> outputSource = new Resource(ResourceType.CUSTOM,
-        dataStore.outputConfig);
+    Resource<List<String>> outputSource = new Resource(ResourceType.CUSTOM,
+        dataStore.outputConfig.getOutputData());
 
-    StoreRequest storeReq = new StoreRequest(
-        outputSource, loadResp.getPayload(), Delimiter.defaultDelimiter()); 
+    ComputationRequest compReq = new ComputationRequest(
+        new Resource(ResourceType.CUSTOM, inputConfig.inputData), outputSource,
+        Delimiter.defaultDelimiter());
+    ComputationResponse compResp = net.compute(compReq);
 
-    StoreResponse storeResp = dataStore.storeData(storeReq);
-
-
-    // Validate API status
-    assertEquals(ApiStatus.SUCCESS, storeResp.getStatus());
-
+    // check the the result of running the computation on input 1 matches the
+    // expected result of running the computation on 1
+    assertEquals(compResp.getResults().get(0), 508141714);
 
   }
 }

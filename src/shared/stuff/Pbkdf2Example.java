@@ -55,7 +55,7 @@ public class Pbkdf2Example {
    */
   public static void main(String[] args) throws NoSuchAlgorithmException {
 
-    int input = 5;
+    int input = 1;
     System.out.println(Pbkdf2.compute(input));
 
   }

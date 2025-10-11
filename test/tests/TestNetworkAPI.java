@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import api.implementations.ConceptualAPI;
 import api.implementations.NetworkAPI;
@@ -34,14 +35,15 @@ public class TestNetworkAPI {
     // Use real APIs instead of mocks
     networkApi = new NetworkAPI();
 
-    conceptualApi = new ConceptualAPI();
+    processApi = Mockito.mock(ProcessAPI.class);
+    conceptualApi = Mockito.mock(ConceptualAPI.class);
 
     networkApi.setCompute(conceptualApi);
+    networkApi.setReadWrite(processApi);
 
     Resource resource = new Resource(ResourceType.DATABASE, "db://mydb");
     networkApi.setResource(resource);
-    processApi = new ProcessAPI(resource);
-    networkApi.setReadWrite(processApi);
+
   }
 
   @Test

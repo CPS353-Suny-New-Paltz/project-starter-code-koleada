@@ -36,6 +36,10 @@ public class ProcessAPI implements ProcessApi {
     if (src.getType() == ResourceType.FILE && src.getUri() != null) {
       return loadFromFile(src, request.getDelimiter());
     }
+    if (src.getType() == ResourceType.CUSTOM) {
+      return new LoadResponse(ApiStatus.SUCCESS, src.getData(),
+          request.getDelimiter(), null);
+    }
     return new LoadResponse(ApiStatus.ERROR, new ArrayList<>(),
         Delimiter.defaultDelimiter(),
         "Unsupported resource type or missing URI");
@@ -46,6 +50,10 @@ public class ProcessAPI implements ProcessApi {
     Resource dest = request.getDestination();
     if (dest.getType() == ResourceType.FILE && dest.getUri() != null) {
       return storeToFile(dest, request.getPayload(), request.getDelimiter());
+    }
+    if (dest.getType() == ResourceType.CUSTOM) {
+      dest.setData(request.getPayload());
+      return new StoreResponse(ApiStatus.SUCCESS, dest, null);
     }
     return new StoreResponse(ApiStatus.ERROR, dest,
         "Unsupported resource type or missing URI");
@@ -65,6 +73,8 @@ public class ProcessAPI implements ProcessApi {
       String content = Files.readString(Paths.get(src.getUri()));
       String[] tokens = content.split(delimiter.getValue());
 
+      // we read strings from a file, split them on the delimiter, trim each
+      // string, ensure theyre not the empty string, adn turn them into integers
       List<Integer> data = Arrays.stream(tokens).map(String::trim)
           .filter(s -> !s.isEmpty()).map(Integer::parseInt)
           .collect(Collectors.toList());
