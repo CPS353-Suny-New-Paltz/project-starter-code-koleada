@@ -28,8 +28,6 @@ public class ProcessAPI implements ProcessApi {
 
   public ProcessAPI(Resource resource) {
 
-    if (resource == null)
-      throw new IllegalArgumentException("Resource cannot be null");
     this.resource = resource;
   }
 
@@ -104,7 +102,7 @@ public class ProcessAPI implements ProcessApi {
       // validate resource uri
       if (src.getUri() == null || !Files.exists(Paths.get(src.getUri()))) {
         throw new IllegalArgumentException(
-            "File does not exist: " + src.getUri());
+            "File " + src.getUri() + " does not exist");
       }
       if (!Files.isReadable(Paths.get(src.getUri()))) {
         throw new IllegalArgumentException(

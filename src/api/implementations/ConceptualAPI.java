@@ -53,6 +53,10 @@ public class ConceptualAPI implements ConceptualApi {
    */
   @Override
   public JobResponse performComputation(int input) {
+
+    // do not need to check if input is null because primitive type int cannot
+    // be null
+
     String jobId = UUID.randomUUID().toString();
     jobStatuses.put(jobId, JobStatus.RUNNING);
 

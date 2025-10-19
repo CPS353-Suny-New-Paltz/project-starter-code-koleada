@@ -43,7 +43,7 @@ public class InMemoryDataStore implements ProcessApi {
       delimiter = req.getDelimiter();
     }
 
-    List<Integer> payloadStr = req.getPayload();
+    List<?> payloadStr = req.getPayload();
 
     // Clear old output and write new data
     outputConfig.setOutputData(new java.util.ArrayList<>());
