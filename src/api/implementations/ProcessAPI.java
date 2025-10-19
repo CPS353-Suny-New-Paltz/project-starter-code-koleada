@@ -35,39 +35,59 @@ public class ProcessAPI implements ProcessApi {
 
   @Override
   public LoadResponse load(LoadRequest request) {
+    try {
+      if (request == null)
+        throw new IllegalArgumentException("Request cannot be null");
 
-    if (request == null)
-      throw new IllegalArgumentException("Request cannot be null");
+      Resource src = request.getSource();
+      if (src.getType() == ResourceType.FILE && src.getUri() != null) {
+        // delegate to helper, which already has its own exception handling
+        return loadFromFile(src, request.getDelimiter());
+      }
+      if (src.getType() == ResourceType.CUSTOM) {
+        return new LoadResponse(ApiStatus.SUCCESS, src.getData(),
+            request.getDelimiter(), null);
+      }
+      return new LoadResponse(ApiStatus.ERROR, new ArrayList<>(),
+          Delimiter.defaultDelimiter(),
+          "Unsupported resource type or missing URI");
 
-    Resource src = request.getSource();
-    if (src.getType() == ResourceType.FILE && src.getUri() != null) {
-      return loadFromFile(src, request.getDelimiter());
+    } catch (IllegalArgumentException e) {
+      return new LoadResponse(ApiStatus.ERROR, new ArrayList<>(),
+          Delimiter.defaultDelimiter(), "Invalid request: " + e.getMessage());
+    } catch (Exception e) {
+      return new LoadResponse(ApiStatus.ERROR, new ArrayList<>(),
+          Delimiter.defaultDelimiter(), "Unexpected error: " + e.getMessage());
     }
-    if (src.getType() == ResourceType.CUSTOM) {
-      return new LoadResponse(ApiStatus.SUCCESS, src.getData(),
-          request.getDelimiter(), null);
-    }
-    return new LoadResponse(ApiStatus.ERROR, new ArrayList<>(),
-        Delimiter.defaultDelimiter(),
-        "Unsupported resource type or missing URI");
   }
 
   @Override
   public StoreResponse store(StoreRequest request) {
+    try {
+      if (request == null)
+        throw new IllegalArgumentException("Request cannot be null");
 
-    if (request == null)
-      throw new IllegalArgumentException("Request cannot be null");
+      Resource dest = request.getDestination();
+      if (dest.getType() == ResourceType.FILE && dest.getUri() != null) {
+        // delegate to helper, which already has its own exception handling
+        return storeToFile(dest, request.getPayload(), request.getDelimiter());
+      }
+      if (dest.getType() == ResourceType.CUSTOM) {
+        dest.setData(request.getPayload());
+        return new StoreResponse(ApiStatus.SUCCESS, dest, null);
+      }
+      return new StoreResponse(ApiStatus.ERROR, dest,
+          "Unsupported resource type or missing URI");
 
-    Resource dest = request.getDestination();
-    if (dest.getType() == ResourceType.FILE && dest.getUri() != null) {
-      return storeToFile(dest, request.getPayload(), request.getDelimiter());
+    } catch (IllegalArgumentException e) {
+      return new StoreResponse(ApiStatus.ERROR,
+          request != null ? request.getDestination() : null,
+          "Invalid request: " + e.getMessage());
+    } catch (Exception e) {
+      return new StoreResponse(ApiStatus.ERROR,
+          request != null ? request.getDestination() : null,
+          "Unexpected error: " + e.getMessage());
     }
-    if (dest.getType() == ResourceType.CUSTOM) {
-      dest.setData(request.getPayload());
-      return new StoreResponse(ApiStatus.SUCCESS, dest, null);
-    }
-    return new StoreResponse(ApiStatus.ERROR, dest,
-        "Unsupported resource type or missing URI");
   }
 
   /**
@@ -81,22 +101,36 @@ public class ProcessAPI implements ProcessApi {
    */
   private LoadResponse loadFromFile(Resource src, Delimiter delimiter) {
     try {
+      // validate resource uri
+      if (src.getUri() == null || !Files.exists(Paths.get(src.getUri()))) {
+        throw new IllegalArgumentException(
+            "File does not exist: " + src.getUri());
+      }
+      if (!Files.isReadable(Paths.get(src.getUri()))) {
+        throw new IllegalArgumentException(
+            "File is not readable: " + src.getUri());
+      }
+
       String content = Files.readString(Paths.get(src.getUri()));
       String[] tokens = content.split(delimiter.getValue());
 
-      // we read strings from a file, split them on the delimiter, trim each
-      // string, ensure theyre not the empty string, adn turn them into integers
       List<Integer> data = Arrays.stream(tokens).map(String::trim)
           .filter(s -> !s.isEmpty()).map(Integer::parseInt)
           .collect(Collectors.toList());
 
       return new LoadResponse(ApiStatus.SUCCESS, new ArrayList<>(data),
           Delimiter.defaultDelimiter(), "Loaded successfully");
-    } catch (IOException | NumberFormatException e) {
-      return new LoadResponse(ApiStatus.ERROR, new ArrayList<>(),
-          Delimiter.defaultDelimiter(), "Failed to load: " + e.getMessage());
-    }
 
+    } catch (IllegalArgumentException e) {
+      return new LoadResponse(ApiStatus.ERROR, new ArrayList<>(),
+          Delimiter.defaultDelimiter(), "Invalid file: " + e.getMessage());
+    } catch (IOException e) {
+      return new LoadResponse(ApiStatus.ERROR, new ArrayList<>(),
+          Delimiter.defaultDelimiter(), "I/O error: " + e.getMessage());
+    } catch (Exception e) {
+      return new LoadResponse(ApiStatus.ERROR, new ArrayList<>(),
+          Delimiter.defaultDelimiter(), "Unexpected error: " + e.getMessage());
+    }
   }
 
   /**
@@ -113,18 +147,33 @@ public class ProcessAPI implements ProcessApi {
   private StoreResponse storeToFile(Resource<?> dest, List<?> batch,
       Delimiter delimiter) {
     try {
-      List<?> payload = batch;
-      String joined = payload.stream().map(Object::toString)
+      // Validate resource URI before writing
+      if (dest.getUri() == null) {
+        throw new IllegalArgumentException("Destination URI cannot be null");
+      }
+      if (dest.getType() == ResourceType.FILE
+          && !Files.exists(Paths.get(dest.getUri()))) {
+        // If file doesn't exist, attempt to create parent directories
+        Paths.get(dest.getUri()).getParent().toFile().mkdirs();
+      }
+
+      String joined = batch.stream().map(Object::toString)
           .collect(Collectors.joining(delimiter.getValue()));
 
       Files.writeString(Paths.get(dest.getUri()), joined);
 
       return new StoreResponse(ApiStatus.SUCCESS, dest, "Stored successfully");
+
+    } catch (IllegalArgumentException e) {
+      return new StoreResponse(ApiStatus.ERROR, dest,
+          "Invalid file: " + e.getMessage());
     } catch (IOException e) {
       return new StoreResponse(ApiStatus.ERROR, dest,
-          "Failed to store: " + e.getMessage());
+          "I/O error: " + e.getMessage());
+    } catch (Exception e) {
+      return new StoreResponse(ApiStatus.ERROR, dest,
+          "Unexpected error: " + e.getMessage());
     }
-
   }
 
   public Resource<?> getResource() {
