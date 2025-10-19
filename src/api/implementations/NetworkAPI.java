@@ -69,9 +69,7 @@ public class NetworkAPI implements NetworkApi {
     } catch (IllegalArgumentException e) {
       return new LogoutResponse(ApiStatus.ERROR,
           "Invalid request: " + e.getMessage());
-    }
-    // unexpected exceptions
-    catch (Exception e) {
+    } catch (Exception e) {
       return new LogoutResponse(ApiStatus.ERROR, "Error: " + e.getMessage());
     }
 
