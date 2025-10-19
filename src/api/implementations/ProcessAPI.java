@@ -34,9 +34,9 @@ public class ProcessAPI implements ProcessApi {
   @Override
   public LoadResponse load(LoadRequest request) {
     try {
-      if (request == null)
+      if (request == null) {
         throw new IllegalArgumentException("Request cannot be null");
-
+      }
       Resource src = request.getSource();
       if (src.getType() == ResourceType.FILE && src.getUri() != null) {
         // delegate to helper, which already has its own exception handling
@@ -62,9 +62,9 @@ public class ProcessAPI implements ProcessApi {
   @Override
   public StoreResponse store(StoreRequest request) {
     try {
-      if (request == null)
+      if (request == null) {
         throw new IllegalArgumentException("Request cannot be null");
-
+      }
       Resource dest = request.getDestination();
       if (dest.getType() == ResourceType.FILE && dest.getUri() != null) {
         // delegate to helper, which already has its own exception handling

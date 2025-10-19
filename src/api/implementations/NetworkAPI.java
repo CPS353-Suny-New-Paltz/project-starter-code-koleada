@@ -40,8 +40,9 @@ public class NetworkAPI implements NetworkApi {
   @Override
   public LoginResponse login(LoginRequest req) {
     try {
-      if (req == null)
+      if (req == null) {
         throw new IllegalArgumentException("req cannot be null");
+      }
 
       return new LoginResponse(UUID.randomUUID().toString(),
           UUID.randomUUID().toString(), ApiStatus.ERROR);
@@ -60,9 +61,9 @@ public class NetworkAPI implements NetworkApi {
   @Override
   public LogoutResponse logout(LogoutRequest req) {
     try {
-      if (req == null)
+      if (req == null) {
         throw new IllegalArgumentException("Request cannot be null");
-
+      }
       return new LogoutResponse(ApiStatus.ERROR);
 
     } catch (IllegalArgumentException e) {
@@ -83,9 +84,9 @@ public class NetworkAPI implements NetworkApi {
   @Override
   public ComputationResponse compute(ComputationRequest request) {
 
-    if (request == null)
+    if (request == null) {
       throw new IllegalArgumentException("Request cannot be null");
-
+    }
     try {
       // Load integers from input resource
       LoadResponse loadResp = readWrite.load(

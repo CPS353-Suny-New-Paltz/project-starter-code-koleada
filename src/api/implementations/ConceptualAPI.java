@@ -25,10 +25,10 @@ public class ConceptualAPI implements ConceptualApi {
   @Override
   public JobResponse checkStatus(String jobId) {
     try {
-      if (jobId == null)
+      if (jobId == null) {
         throw new IllegalArgumentException(
             "Cannot check status for null JobId");
-
+      }
       JobStatus status = jobStatuses.get(jobId);
       return new JobResponse(jobId, status, -1);
 

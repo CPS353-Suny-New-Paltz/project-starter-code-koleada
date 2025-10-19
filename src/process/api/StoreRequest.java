@@ -18,9 +18,10 @@ public class StoreRequest {
   public StoreRequest(Resource<?> destination, List<?> data,
       Delimiter delimiter) {
 
-    if (destination == null || data == null || delimiter == null)
+    if (destination == null || data == null || delimiter == null) {
       throw new IllegalArgumentException(
           "destination, data, or delimiter is null");
+    }
     this.destination = destination;
     this.payload = data;
     this.delimiter = delimiter;
