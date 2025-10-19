@@ -24,6 +24,10 @@ public class ConceptualAPI implements ConceptualApi {
 
   @Override
   public JobResponse checkStatus(String jobId) {
+
+    if (jobId == null)
+      throw new IllegalArgumentException("Cannot check status for null JobId");
+
     JobStatus status = jobStatuses.get(jobId);
     return new JobResponse(jobId, status, -1);
   }
@@ -43,6 +47,9 @@ public class ConceptualAPI implements ConceptualApi {
   @Override
   public JobResponse performComputation(int input)
       throws NoSuchAlgorithmException {
+
+    // type int cannot be null so no checks are required here
+
     String jobId = UUID.randomUUID().toString();
     jobStatuses.put(jobId, JobStatus.RUNNING);
 

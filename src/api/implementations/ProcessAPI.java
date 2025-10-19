@@ -27,11 +27,18 @@ public class ProcessAPI implements ProcessApi {
   private Resource resource;
 
   public ProcessAPI(Resource resource) {
+
+    if (resource == null)
+      throw new IllegalArgumentException("Resource cannot be null");
     this.resource = resource;
   }
 
   @Override
   public LoadResponse load(LoadRequest request) {
+
+    if (request == null)
+      throw new IllegalArgumentException("Request cannot be null");
+
     Resource src = request.getSource();
     if (src.getType() == ResourceType.FILE && src.getUri() != null) {
       return loadFromFile(src, request.getDelimiter());
@@ -47,6 +54,10 @@ public class ProcessAPI implements ProcessApi {
 
   @Override
   public StoreResponse store(StoreRequest request) {
+
+    if (request == null)
+      throw new IllegalArgumentException("Request cannot be null");
+
     Resource dest = request.getDestination();
     if (dest.getType() == ResourceType.FILE && dest.getUri() != null) {
       return storeToFile(dest, request.getPayload(), request.getDelimiter());
@@ -99,7 +110,7 @@ public class ProcessAPI implements ProcessApi {
    *          added in between each data element
    * @return
    */
-  private StoreResponse storeToFile(Resource dest, List batch,
+  private StoreResponse storeToFile(Resource<?> dest, List<?> batch,
       Delimiter delimiter) {
     try {
       List<?> payload = batch;
@@ -116,11 +127,11 @@ public class ProcessAPI implements ProcessApi {
 
   }
 
-  public Resource getResource() {
+  public Resource<?> getResource() {
     return resource;
   }
 
-  public void setResource(Resource resource) {
+  public void setResource(Resource<?> resource) {
     this.resource = resource;
   }
 

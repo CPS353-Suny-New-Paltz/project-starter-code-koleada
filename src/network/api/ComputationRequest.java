@@ -12,6 +12,23 @@ public class ComputationRequest {
 
   public ComputationRequest(Resource inputResource, Resource outputResource,
       Delimiter delimiter) {
+
+    // validation of inputs, since this class is passed as a param to public
+    // network api methods
+    if (inputResource == null) {
+      throw new IllegalArgumentException("Input resource cannot be null.");
+    }
+    if (outputResource == null) {
+      throw new IllegalArgumentException("Output resource cannot be null.");
+    }
+    if (delimiter == null) {
+      throw new IllegalArgumentException("Delimiter cannot be null.");
+    }
+    if (inputResource.equals(outputResource)) {
+      throw new IllegalArgumentException(
+          "Input and output resources must be different.");
+    }
+
     this.inputResource = inputResource;
     this.outputResource = outputResource;
     this.delimiter = delimiter;

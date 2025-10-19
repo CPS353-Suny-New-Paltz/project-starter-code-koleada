@@ -10,8 +10,11 @@ public final class LoginRequest {
   private final String hashedPassword;
 
   public LoginRequest(String username, String password) {
-    this.username = Objects.requireNonNull(username);
-    this.hashedPassword = Objects.requireNonNull(password);
+
+    // validate params are not null
+    this.username = Objects.requireNonNull(username, "Username cannot be null");
+    this.hashedPassword = Objects.requireNonNull(password,
+        "Password cannot be null");
   }
 
   public String getUsername() {

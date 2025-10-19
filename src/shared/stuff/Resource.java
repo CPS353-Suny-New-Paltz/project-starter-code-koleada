@@ -14,12 +14,22 @@ public class Resource<T> {
 
   // Construction with specified URI
   public Resource(ResourceType type, String uri) {
+    if (type == ResourceType.CUSTOM)
+      throw new IllegalArgumentException(
+          "Resource Type is custom, but no list is provided");
     this.type = Objects.requireNonNull(type);
     this.uri = uri;
   }
 
   // No URI constructor (eg for CUSTOM resources)
   public Resource(ResourceType type, List<T> data) {
+
+    if (data == null && type == ResourceType.CUSTOM)
+      throw new IllegalArgumentException(
+          "ResourceType is Custom, but data is null");
+    if (type != ResourceType.CUSTOM)
+      throw new IllegalArgumentException(
+          "ResourceType is not Custom but list is provided");
     this.type = Objects.requireNonNull(type);
     this.uri = null;
     this.data = data;

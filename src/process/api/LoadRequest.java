@@ -12,6 +12,10 @@ public class LoadRequest {
   private final Delimiter delimiter;
 
   public LoadRequest(Resource source, Delimiter delimiter) {
+
+    if (source == null || delimiter == null)
+      throw new IllegalArgumentException("source or delimiter is null");
+
     this.source = source;
     this.delimiter = delimiter;
   }

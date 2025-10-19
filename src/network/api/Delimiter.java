@@ -4,10 +4,15 @@ package network.api;
  * This enum controls the allowed delimiters and handles setting a default one
  * when not specified by the user
  */
-public final class Delimiter {
+public enum Delimiter {
+  COMMA(","), COLON(":"), SEMICOLON(";"), PIPE("|");
+
   private final String value;
 
-  private Delimiter(String value) {
+  // since its an enum, this essentially works as a private constructor,
+  // ensuring only the tokens defined in this enum can be used to make
+  // delimiters
+  Delimiter(String value) {
     this.value = value;
   }
 
@@ -15,13 +20,8 @@ public final class Delimiter {
     return value;
   }
 
-  public static final Delimiter COMMA = new Delimiter(",");
-  public static final Delimiter COLON = new Delimiter(":");
-  public static final Delimiter SEMICOLON = new Delimiter(";");
-  public static final Delimiter PIPE = new Delimiter("|");
-
   /**
-   * Default delimiter used if user does not specify
+   * Returns the default delimiter (comma).
    */
   public static Delimiter defaultDelimiter() {
     return COMMA;

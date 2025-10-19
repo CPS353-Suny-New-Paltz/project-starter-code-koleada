@@ -9,7 +9,8 @@ public final class LogoutRequest {
   private final String sessionToken;
 
   public LogoutRequest(String sessionToken) {
-    this.sessionToken = Objects.requireNonNull(sessionToken);
+    this.sessionToken = Objects.requireNonNull(sessionToken,
+        "Session token cannot be null");
   }
 
   public String getSessionToken() {

@@ -14,7 +14,8 @@ public final class LoginResponse {
 
   public LoginResponse(String sessionToken, String userId, ApiStatus status) {
     this.sessionToken = Objects.requireNonNull(sessionToken);
-    this.userId = Objects.requireNonNull(userId);
+    // can be null if there is an error when logging in
+    this.userId = userId;
     this.status = status;
   }
 

@@ -11,20 +11,25 @@ import shared.stuff.Resource;
  */
 public class StoreRequest {
 
-  private final Resource destination;
-  private final List payload;
+  private final Resource<?> destination;
+  private final List<?> payload;
   private final Delimiter delimiter;
 
-  public StoreRequest(Resource destination, List data, Delimiter delimiter) {
+  public StoreRequest(Resource<?> destination, List<?> data,
+      Delimiter delimiter) {
+
+    if (destination == null || data == null || delimiter == null)
+      throw new IllegalArgumentException(
+          "destination, data, or delimiter is null");
     this.destination = destination;
     this.payload = data;
     this.delimiter = delimiter;
   }
 
-  public Resource getDestination() {
+  public Resource<?> getDestination() {
     return destination;
   }
-  public List getPayload() {
+  public List<?> getPayload() {
     return payload;
   }
   public Delimiter getDelimiter() {
