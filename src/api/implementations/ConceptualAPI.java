@@ -33,8 +33,10 @@ public class ConceptualAPI implements ConceptualApi {
       return new JobResponse(jobId, status, -1);
 
     } catch (IllegalArgumentException e) {
+      // catch null job request
       return new JobResponse(null, JobStatus.FAILED, -1);
     } catch (Exception e) {
+      // catch unexpected
       return new JobResponse(null, JobStatus.FAILED, -1);
     }
   }
@@ -67,10 +69,12 @@ public class ConceptualAPI implements ConceptualApi {
       return new JobResponse(jobId, JobStatus.COMPLETED, result);
 
     } catch (NoSuchAlgorithmException e) {
+      // can be thrown by calling .compute()
       jobStatuses.put(jobId, JobStatus.FAILED);
       return new JobResponse(jobId, JobStatus.FAILED, -1);
 
     } catch (Exception e) {
+      // add to map and catch unexpected
       jobStatuses.put(jobId, JobStatus.FAILED);
       return new JobResponse(jobId, JobStatus.FAILED, -1);
     }

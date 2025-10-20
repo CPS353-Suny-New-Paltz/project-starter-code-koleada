@@ -51,9 +51,11 @@ public class ProcessAPI implements ProcessApi {
           "Unsupported resource type or missing URI");
 
     } catch (IllegalArgumentException e) {
+      // null req
       return new LoadResponse(ApiStatus.ERROR, new ArrayList<>(),
           Delimiter.defaultDelimiter(), "Invalid request: " + e.getMessage());
     } catch (Exception e) {
+      // unexpected exceptions
       return new LoadResponse(ApiStatus.ERROR, new ArrayList<>(),
           Delimiter.defaultDelimiter(), "Unexpected error: " + e.getMessage());
     }
@@ -78,10 +80,13 @@ public class ProcessAPI implements ProcessApi {
           "Unsupported resource type or missing URI");
 
     } catch (IllegalArgumentException e) {
+      // catch null request
       return new StoreResponse(ApiStatus.ERROR,
+          // if request is not null add the destination to the response
           request != null ? request.getDestination() : null,
           "Invalid request: " + e.getMessage());
     } catch (Exception e) {
+      // unexpected exceptions
       return new StoreResponse(ApiStatus.ERROR,
           request != null ? request.getDestination() : null,
           "Unexpected error: " + e.getMessage());
@@ -104,6 +109,7 @@ public class ProcessAPI implements ProcessApi {
         throw new IllegalArgumentException(
             "File " + src.getUri() + " does not exist");
       }
+      // validate resource is readable
       if (!Files.isReadable(Paths.get(src.getUri()))) {
         throw new IllegalArgumentException(
             "File is not readable: " + src.getUri());
@@ -120,12 +126,15 @@ public class ProcessAPI implements ProcessApi {
           Delimiter.defaultDelimiter(), "Loaded successfully");
 
     } catch (IllegalArgumentException e) {
+      // catch invalid file uri or unreadable file
       return new LoadResponse(ApiStatus.ERROR, new ArrayList<>(),
           Delimiter.defaultDelimiter(), "Invalid file: " + e.getMessage());
     } catch (IOException e) {
+      // catch error reading file
       return new LoadResponse(ApiStatus.ERROR, new ArrayList<>(),
           Delimiter.defaultDelimiter(), "I/O error: " + e.getMessage());
     } catch (Exception e) {
+      // catch unexpected
       return new LoadResponse(ApiStatus.ERROR, new ArrayList<>(),
           Delimiter.defaultDelimiter(), "Unexpected error: " + e.getMessage());
     }
@@ -151,10 +160,11 @@ public class ProcessAPI implements ProcessApi {
       }
       if (dest.getType() == ResourceType.FILE
           && !Files.exists(Paths.get(dest.getUri()))) {
-        // If file doesn't exist, attempt to create parent directories
+        // if file doesn't exist create parent directories
         Paths.get(dest.getUri()).getParent().toFile().mkdirs();
       }
 
+      // join batch items into string w/ delim
       String joined = batch.stream().map(Object::toString)
           .collect(Collectors.joining(delimiter.getValue()));
 
@@ -163,12 +173,15 @@ public class ProcessAPI implements ProcessApi {
       return new StoreResponse(ApiStatus.SUCCESS, dest, "Stored successfully");
 
     } catch (IllegalArgumentException e) {
+      // catch invalid file
       return new StoreResponse(ApiStatus.ERROR, dest,
           "Invalid file: " + e.getMessage());
     } catch (IOException e) {
+      // catch error writing to file
       return new StoreResponse(ApiStatus.ERROR, dest,
           "I/O error: " + e.getMessage());
     } catch (Exception e) {
+      // catch unexpected
       return new StoreResponse(ApiStatus.ERROR, dest,
           "Unexpected error: " + e.getMessage());
     }

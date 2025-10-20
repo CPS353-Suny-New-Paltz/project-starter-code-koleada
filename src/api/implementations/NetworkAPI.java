@@ -48,6 +48,7 @@ public class NetworkAPI implements NetworkApi {
           UUID.randomUUID().toString(), ApiStatus.ERROR);
 
     } catch (IllegalArgumentException e) {
+      // null req
       return new LoginResponse(null, null, ApiStatus.ERROR,
           "Invalid request: " + e.getMessage());
     } catch (Exception e) {
@@ -67,9 +68,11 @@ public class NetworkAPI implements NetworkApi {
       return new LogoutResponse(ApiStatus.ERROR);
 
     } catch (IllegalArgumentException e) {
+      // catch null req
       return new LogoutResponse(ApiStatus.ERROR,
           "Invalid request: " + e.getMessage());
     } catch (Exception e) {
+      // catch all exceptions we dont expect
       return new LogoutResponse(ApiStatus.ERROR, "Error: " + e.getMessage());
     }
 
@@ -120,9 +123,11 @@ public class NetworkAPI implements NetworkApi {
           "Computation completed");
 
     } catch (IllegalArgumentException e) {
+      // catch null request
       return new ComputationResponse(ApiStatus.ERROR, new ArrayList<>(),
           "Invalid request: " + e.getMessage());
     } catch (Exception e) {
+      // catch unexpected exceptions
       return new ComputationResponse(ApiStatus.ERROR, new ArrayList<>(),
           "Error: " + e.getMessage());
     }
