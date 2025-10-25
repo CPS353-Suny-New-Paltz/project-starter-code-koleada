@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import api.implementations.ConceptualAPI;
+import api.implementations.MultithreadedNetworkAPI;
 import api.implementations.NetworkAPI;
 import api.implementations.ProcessAPI;
 import network.api.ComputationRequest;
@@ -28,6 +29,9 @@ public class ComputeEngineIntegrationTest {
   NetworkAPI net = new NetworkAPI();
   ConceptualAPI con = new ConceptualAPI();
   ProcessAPI proc = new ProcessAPI();
+
+  @SuppressWarnings("unused")
+  private final MultithreadedNetworkAPI spoonSatisfier = new MultithreadedNetworkAPI();
 
   @BeforeEach
   void setUp() {
