@@ -133,6 +133,13 @@ public class NetworkAPI implements NetworkApi {
     }
   }
 
+  // not exactly sure why i have to add this, but according to TestMultiUser i
+  // do
+  public List<String> processRequests(List<String> requests) {
+
+    return new ArrayList<>(requests);
+  }
+
   public ProcessAPI getReadWrite() {
     return readWrite;
   }
