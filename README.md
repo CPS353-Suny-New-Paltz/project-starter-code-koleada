@@ -20,3 +20,8 @@ Example:
 Input: 12345
 Iterations: 1000 outer, 10 inner = 10,000 total (this can be changed to make it more or less computationally intense)
 Output: 1890392330
+
+### Network API
+
+This API is multithreaded to allow multiple users to initiate computation requests. I chose a maximum of 8 threads as my CPU has 6 physical cores and 12 threads in total. 8 is a 
+good middle ground to maximize efficiency from multithreading without overwhelming the CPU and reducing efficiency. I also made the number of threads slightly dynamic, so my code will choose the max number of threads by looking at the number of processors on the client machine and taking the minimum of that and 8. 

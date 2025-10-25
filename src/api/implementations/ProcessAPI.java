@@ -23,12 +23,8 @@ import shared.stuff.ResourceType;
  */
 public class ProcessAPI implements ProcessApi {
 
-  // need to know which resource for storing and loading data
-  private Resource resource;
+  public ProcessAPI() {
 
-  public ProcessAPI(Resource resource) {
-
-    this.resource = resource;
   }
 
   @Override
@@ -185,14 +181,6 @@ public class ProcessAPI implements ProcessApi {
       return new StoreResponse(ApiStatus.ERROR, dest,
           "Unexpected error: " + e.getMessage());
     }
-  }
-
-  public Resource<?> getResource() {
-    return resource;
-  }
-
-  public void setResource(Resource<?> resource) {
-    this.resource = resource;
   }
 
 }

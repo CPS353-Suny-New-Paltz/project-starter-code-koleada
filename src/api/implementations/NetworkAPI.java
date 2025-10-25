@@ -24,13 +24,19 @@ import shared.stuff.Resource;
  */
 public class NetworkAPI implements NetworkApi {
 
-  // will need to communicate with the ProcessAPI to pass instructions to the
-  // Data Storage System
   private ProcessAPI readWrite;
 
-  // Will also need to talk to the computation section to perform calculations,
-  // get session keys, etc
   private ConceptualAPI compute;
+
+  public NetworkAPI() {
+    // will need to communicate with the ProcessAPI to pass instructions to the
+    // Data Storage System
+    this.readWrite = new ProcessAPI();
+    // Will also need to talk to the computation section to perform
+    // calculations,
+    // get session keys, etc
+    this.compute = new ConceptualAPI();
+  }
 
   // default delimiter if user does not provide one
   private Delimiter defaultDelimiter = Delimiter.COMMA;
@@ -80,7 +86,7 @@ public class NetworkAPI implements NetworkApi {
 
   /**
    * does the computation: read input, run compute, write output, return results
-   * as byte[]
+   * as Arraylist<Integer>
    */
   @Override
   public ComputationResponse compute(ComputationRequest request) {

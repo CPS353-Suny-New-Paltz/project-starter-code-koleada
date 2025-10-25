@@ -27,7 +27,7 @@ public class ComputeEngineIntegrationTest {
 
   NetworkAPI net = new NetworkAPI();
   ConceptualAPI con = new ConceptualAPI();
-  ProcessAPI proc = new ProcessAPI(null);
+  ProcessAPI proc = new ProcessAPI();
 
   @BeforeEach
   void setUp() {

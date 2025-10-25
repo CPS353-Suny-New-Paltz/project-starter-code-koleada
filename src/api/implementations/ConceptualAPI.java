@@ -1,9 +1,9 @@
 package api.implementations;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import conceptual.api.ConceptualApi;
 import conceptual.api.JobResponse;
@@ -19,7 +19,8 @@ public class ConceptualAPI implements ConceptualApi {
   private Map<String, JobStatus> jobStatuses;
 
   public ConceptualAPI() {
-    this.jobStatuses = new HashMap<>();
+    // changed this to make it safe for multiple threads
+    this.jobStatuses = new ConcurrentHashMap<>();
   }
 
   @Override

@@ -6,6 +6,7 @@ import network.api.ComputationRequest;
 import network.api.ComputationResponse;
 import network.api.Delimiter;
 import network.api.NetworkApi;
+import shared.stuff.ApiStatus;
 import shared.stuff.Resource;
 import shared.stuff.ResourceType;
 
@@ -17,6 +18,7 @@ public class TestUser {
 
   public TestUser(NetworkApi coordinator) {
     this.coordinator = coordinator;
+
   }
 
   public void run(String outputPath) {
@@ -37,6 +39,14 @@ public class TestUser {
         outputResource, delim);
 
     ComputationResponse response = coordinator.compute(request);
+
+    if (response.getStatus() != ApiStatus.SUCCESS) {
+      System.out.println("Compute failed: " + response.getMessage());
+    }
+
+    File f = new File(outputPath);
+    System.out.println(
+        "Output exists? " + f.exists() + ", path = " + f.getAbsolutePath());
 
   }
 

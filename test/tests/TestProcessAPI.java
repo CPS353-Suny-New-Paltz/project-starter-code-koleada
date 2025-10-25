@@ -32,9 +32,7 @@ public class TestProcessAPI {
    */
   @BeforeEach
   void setup() {
-    // create dummy resource for ProcessAPI
-    dummyResource = new Resource(ResourceType.DATABASE, "db://mydb");
-    processApi = new ProcessAPI(dummyResource);
+    processApi = new ProcessAPI();
   }
 
   /**
@@ -43,8 +41,8 @@ public class TestProcessAPI {
   @Test
   void testLoad() {
     // tests the ProcessAPI.load() method
-    LoadRequest request = new LoadRequest(processApi.getResource(),
-        Delimiter.COMMA);
+    LoadRequest request = new LoadRequest(
+        new Resource(ResourceType.DATABASE, "dummy"), Delimiter.COMMA);
 
     LoadResponse response = processApi.load(request);
 
@@ -67,8 +65,8 @@ public class TestProcessAPI {
     list.add(4);
 
     List batch = new ArrayList<>(list);
-    StoreRequest request = new StoreRequest(processApi.getResource(), batch,
-        Delimiter.COMMA);
+    StoreRequest request = new StoreRequest(
+        new Resource(ResourceType.DATABASE, "dummy"), batch, Delimiter.COMMA);
 
     StoreResponse response = processApi.store(request);
 
@@ -76,23 +74,6 @@ public class TestProcessAPI {
     assertEquals(ApiStatus.ERROR, response.getStatus());
     assertEquals("Unsupported resource type or missing URI",
         response.getMessage());
-  }
-
-  /**
-   * Tests the ProcessAPI resource getters and setters, as well as the resource
-   * class getters
-   */
-  @Test
-  void testProcessApiResource() {
-
-    // test ProcessAPI constructor works properly
-    assertNotNull(processApi.getResource());
-    assertEquals("db://mydb", dummyResource.getUri());
-
-    // test setResource is working
-    processApi
-        .setResource(new Resource(ResourceType.FILE, "file://myfile.txt"));
-    assertEquals(ResourceType.FILE, processApi.getResource().getType());
   }
 
 }

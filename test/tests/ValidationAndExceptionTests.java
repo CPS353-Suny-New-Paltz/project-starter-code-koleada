@@ -29,7 +29,7 @@ public class ValidationAndExceptionTests {
   @BeforeEach
   public void setup() {
     networkAPI = new NetworkAPI();
-    processAPI = new ProcessAPI(new Resource(ResourceType.FILE, "dummy"));
+    processAPI = new ProcessAPI();
   }
 
   /**

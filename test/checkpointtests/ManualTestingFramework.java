@@ -18,7 +18,7 @@ public class ManualTestingFramework {
 
   public static void main(String[] args) {
     // TODO 1: Set up APIs
-    ProcessAPI processApi = new ProcessAPI(null);
+    ProcessAPI processApi = new ProcessAPI();
     ConceptualAPI conceptualApi = new ConceptualAPI();
     NetworkAPI networkApi = new NetworkAPI();
 
