@@ -5,5 +5,5 @@ package shared.stuff;
  * common ones along with a custom option
  */
 public enum ResourceType {
-  FILE, DATABASE, OBJECT_STORE, STREAM, CUSTOM
+  FILE, DATABASE, STREAM, CUSTOM
 }

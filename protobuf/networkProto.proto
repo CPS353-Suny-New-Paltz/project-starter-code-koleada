@@ -1,0 +1,49 @@
+syntax = "proto2";
+
+package project.network.grpc;
+
+option java_package = "project.network.grpc";
+option java_outer_classname = "NetworkProto";
+
+
+enum ApiStatus {
+  UNKNOWN = 0;
+  SUCCESS = 1;
+  NOT_AUTHORIZED = 2;
+  NOT_FOUND = 3;
+  INVALID_REQUEST = 4;
+  ERROR = 5;
+}
+
+enum ResourceType {
+  UNKNOWN_RESOURCE = 0;
+  FILE = 1;
+  CUSTOM = 2;
+  DATABASE = 3;
+  STREAM = 4;
+}
+
+
+message Resource {
+  optional ResourceType type = 1;
+  optional string uri = 2;         // For FILE/DB 
+  repeated int32 data = 3;         // For CUSTOM 
+}
+
+message ComputationRequest {
+  optional Resource input_resource = 1;
+  optional Resource output_resource = 2;
+  optional string delimiter = 3;
+}
+
+
+message ComputationResponse {
+  optional ApiStatus status = 1;
+  repeated int32 results = 2;
+  optional string message = 3;
+}
+
+
+service NetworkService {
+  rpc Compute(ComputationRequest) returns (ComputationResponse);
+}

@@ -8,3 +8,10 @@ build
 .settings
 bin
 *.class
+/build/
+/out/
+/bin/
+/build/generated/
+/build/generated/source/proto/
+/build/generated/source/proto/main/
+/build/generated/source/proto/test/
