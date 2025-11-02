@@ -1,4 +1,4 @@
-package project.network.grpc;
+package project.network.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,6 +6,8 @@ import java.util.Scanner;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import project.network.grpc.NetworkProto;
+import project.network.grpc.NetworkServiceGrpc;
 
 public class NetworkClient {
 
@@ -13,6 +15,7 @@ public class NetworkClient {
 
     Scanner scanner = new Scanner(System.in);
 
+    // allow user to specify host and port
     System.out.print("Enter server host (default localhost): ");
     String host = scanner.nextLine();
     if (host.isEmpty())
@@ -36,7 +39,7 @@ public class NetworkClient {
     List<Integer> numbers = new ArrayList<>();
 
     if ("1".equals(choice)) {
-      System.out.print("Enter input file path: ");
+      System.out.print("Enter input file explicit path: ");
       inputUri = scanner.nextLine();
     } else {
       System.out.print("Enter numbers separated by spaces: ");
@@ -48,7 +51,8 @@ public class NetworkClient {
       }
     }
 
-    System.out.print("Enter output file path: ");
+    // MUST be explicit path!!
+    System.out.print("Enter output file explicit path: ");
     String outputFile = scanner.nextLine();
 
     System.out.print("Enter delimiter (optional, default ','): ");
@@ -71,6 +75,7 @@ public class NetworkClient {
 
     NetworkProto.Resource outputResource = NetworkProto.Resource.newBuilder()
         .setType(NetworkProto.ResourceType.FILE) // must be FILE for ProcessAPI
+                                                 // to write
         .setUri(outputFile).build();
 
     NetworkProto.ComputationRequest request = NetworkProto.ComputationRequest

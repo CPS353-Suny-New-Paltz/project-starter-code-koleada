@@ -1,0 +1,59 @@
+syntax = "proto2";
+
+package project.process.grpc;
+
+option java_package = "project.process.grpc";
+option java_outer_classname = "ProcessProto";
+
+// Api statuses, include all that ProcessAPI uses
+enum ApiStatus {
+  UNKNOWN = 0;
+  SUCCESS = 1;
+  NOT_AUTHORIZED = 2;
+  NOT_FOUND = 3;
+  INVALID_REQUEST = 4;
+  ERROR = 5;
+}
+
+// Resource types
+enum ResourceType {
+  UNKNOWN_RESOURCE = 0;
+  FILE = 1;
+  DATABASE = 2;
+  STREAM = 3;
+  CUSTOM = 4;
+}
+
+message Resource {
+  optional ResourceType type = 1;
+  optional string uri = 2;          // For FILE/DATABASE/STREAM
+  repeated int32 data = 3;          // For CUSTOM
+}
+
+message LoadRequest {
+  optional Resource resource = 1;
+  optional string delimiter = 2;
+}
+
+message LoadResponse {
+  optional ApiStatus status = 1;
+  repeated int32 data = 2;
+  optional string message = 3;
+}
+
+message StoreRequest {
+  optional Resource resource = 1;
+  repeated int32 data = 2;
+  optional string delimiter = 3;
+}
+
+message StoreResponse {
+  optional ApiStatus status = 1;
+  optional string message = 2;
+}
+
+// Service definition
+service ProcessService {
+  rpc Load(LoadRequest) returns (LoadResponse);
+  rpc Store(StoreRequest) returns (StoreResponse);
+}

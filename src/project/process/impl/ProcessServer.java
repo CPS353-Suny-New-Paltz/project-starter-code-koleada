@@ -1,24 +1,28 @@
-package project.network.grpc;
+package project.process.impl;
 
 import java.io.IOException;
 import java.util.Scanner;
 
+import api.implementations.ProcessAPI;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import process.api.ProcessApi;
 
-public class NetworkServer {
+public class ProcessServer {
 
   public static void main(String[] args)
       throws IOException, InterruptedException {
-    int port = 50051;
+    int port = 50052; // port for Process API
+    ProcessApi processApi = new ProcessAPI();
+
     Server server = ServerBuilder.forPort(port)
-        .addService(new NetworkServiceImpl()).build();
+        .addService(new ProcessServiceImpl(processApi)).build();
 
     Thread serverThread = new Thread(() -> {
       try {
         server.start();
         System.out
-            .println("[NetworkServer] gRPC server started on port " + port);
+            .println("[ProcessServer] gRPC server started on port " + port);
         server.awaitTermination();
       } catch (IOException | InterruptedException e) {
         e.printStackTrace();
@@ -26,19 +30,20 @@ public class NetworkServer {
     });
     serverThread.start();
 
-    // Allow user to type "exit" to stop server
+    // same console shutdown idea, that only kinda works at least in eclipse
     Scanner scanner = new Scanner(System.in);
-    System.out.println("[NetworkServer] Type 'exit' to stop the server.");
+    System.out.println("[ProcessServer] Type 'exit' to stop the server.");
     while (true) {
       String input = scanner.nextLine();
       if ("exit".equalsIgnoreCase(input.trim())) {
-        System.out.println("[NetworkServer] Shutting down...");
+        System.out.println("[ProcessServer] Shutting down...");
         server.shutdown();
         break;
       }
     }
     scanner.close();
-    server.awaitTermination(); // optional: wait until shutdown completes
-    System.out.println("[NetworkServer] Server stopped.");
+
+    server.awaitTermination();
+    System.out.println("[ProcessServer] Server stopped.");
   }
 }

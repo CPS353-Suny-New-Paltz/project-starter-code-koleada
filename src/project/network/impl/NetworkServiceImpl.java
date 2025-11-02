@@ -1,4 +1,4 @@
-package project.network.grpc;
+package project.network.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +8,8 @@ import io.grpc.stub.StreamObserver;
 import network.api.ComputationRequest;
 import network.api.ComputationResponse;
 import network.api.Delimiter;
+import project.network.grpc.NetworkProto;
+import project.network.grpc.NetworkServiceGrpc;
 import shared.stuff.ApiStatus;
 import shared.stuff.Resource;
 import shared.stuff.ResourceType;
@@ -19,8 +21,7 @@ public class NetworkServiceImpl
   private final NetworkAPI networkAPI;
 
   public NetworkServiceImpl() {
-    this.networkAPI = new NetworkAPI(); // ensures readWrite (ProcessAPI) is
-                                        // initialized
+    this.networkAPI = new NetworkAPI();
   }
 
   @Override
@@ -28,11 +29,8 @@ public class NetworkServiceImpl
       StreamObserver<NetworkProto.ComputationResponse> responseObserver) {
 
     try {
-      System.out.println("---- Received Compute request ----");
 
-      // ---------------------------
       // Input resource
-      // ---------------------------
       NetworkProto.Resource protoIn = null;
       if (protoReq.hasInputResource()) {
         protoIn = protoReq.getInputResource();
@@ -48,10 +46,7 @@ public class NetworkServiceImpl
           inputResource = new Resource<>(rtype, protoIn.getUri());
         }
       }
-
-      // ---------------------------
       // Output resource
-      // ---------------------------
       NetworkProto.Resource protoOut = null;
       if (protoReq.hasOutputResource()) {
         protoOut = protoReq.getOutputResource();
@@ -63,46 +58,36 @@ public class NetworkServiceImpl
         outputResource = new Resource<>(rtype, protoOut.getUri());
       }
 
-      // ---------------------------
       // Delimiter
-      // ---------------------------
       Delimiter delim = Delimiter.defaultDelimiter(); // default
       if (protoReq.hasDelimiter() && !protoReq.getDelimiter().isEmpty()) {
         String delimStr = protoReq.getDelimiter();
-        if (delimStr.equals(Delimiter.COMMA.getValue())) {
-          delim = Delimiter.COMMA;
-        } else if (delimStr.equals(Delimiter.SEMICOLON.getValue())) {
-          delim = Delimiter.SEMICOLON;
-        } else if (delimStr.equals(Delimiter.PIPE.getValue())) {
-          delim = Delimiter.PIPE;
-        } else if (delimStr.equals(Delimiter.COLON.getValue())) {
-          delim = Delimiter.COLON;
-        } else {
-          delim = Delimiter.defaultDelimiter(); // fallback
+        switch (delimStr.trim()) {
+          case "," :
+            delim = Delimiter.COMMA;
+            break;
+          case ";" :
+            delim = Delimiter.SEMICOLON;
+            break;
+          case "|" :
+            delim = Delimiter.PIPE;
+            break;
+          case ":" :
+            delim = Delimiter.COLON;
+            break;
+          default :
+            delim = Delimiter.defaultDelimiter();
+            break;
         }
       }
-
-      System.out.println("Input resource type: "
-          + (inputResource != null ? inputResource.getType() : "null"));
-      System.out.println("Input URI: "
-          + (inputResource != null ? inputResource.getUri() : "null"));
-      System.out.println("Output resource type: "
-          + (outputResource != null ? outputResource.getType() : "null"));
-      System.out.println("Output URI: "
-          + (outputResource != null ? outputResource.getUri() : "null"));
-      System.out.println("Delimiter: " + delim.getValue());
 
       ComputationRequest domainReq = new ComputationRequest(inputResource,
           outputResource, delim);
 
-      // ---------------------------
-      // Call NetworkAPI
-      // ---------------------------
+      // Call normala networkAPI
       ComputationResponse domainResp = networkAPI.compute(domainReq);
 
-      // ---------------------------
       // Build proto response
-      // ---------------------------
       NetworkProto.ComputationResponse.Builder respBuilder = NetworkProto.ComputationResponse
           .newBuilder();
 
@@ -157,7 +142,7 @@ public class NetworkServiceImpl
       case STREAM :
         return ResourceType.STREAM;
       default :
-        return ResourceType.FILE;
+        return ResourceType.FILE;// fallback
     }
   }
 }

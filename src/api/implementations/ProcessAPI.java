@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import network.api.Delimiter;
@@ -116,14 +117,20 @@ public class ProcessAPI implements ProcessApi {
       }
 
       String content = Files.readString(path);
-      String[] tokens = content.split(delimiter.getValue());
+      String regex = Pattern.quote(delimiter.getValue()); // got a super weird
+                                                          // error from using |
+                                                          // as a delim have to
+                                                          // escape special
+                                                          // chars
+      String[] tokens = content.split(regex);
 
       List<Integer> data = Arrays.stream(tokens).map(String::trim)
           .filter(s -> !s.isEmpty()).map(Integer::parseInt)
           .collect(Collectors.toList());
 
       return new LoadResponse(ApiStatus.SUCCESS, new ArrayList<>(data),
-          Delimiter.defaultDelimiter(), "Loaded successfully");
+          delimiter, "Loaded successfully"); // <-- return the actual delimiter
+                                             // used
 
     } catch (IllegalArgumentException e) {
       return new LoadResponse(ApiStatus.ERROR, new ArrayList<>(),
