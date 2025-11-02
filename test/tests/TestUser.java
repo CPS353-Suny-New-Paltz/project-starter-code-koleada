@@ -53,16 +53,18 @@ public class TestUser {
    */
 
   public void run(String outputPath) {
-    // Only fix input path
-    String projectRoot = System.getProperty("user.dir");
-    String inputPath = projectRoot + File.separator + "test" + File.separator
-        + "testInputFile.test";
+    // Load from classpath
+    String inputPath;
+    try {
+      inputPath = new File(
+          getClass().getClassLoader().getResource("testInputFile.test").toURI())
+          .getAbsolutePath();
+    } catch (Exception e) {
+      throw new RuntimeException("Test input file not found", e);
+    }
 
     Resource inputResource = new Resource(ResourceType.FILE, inputPath);
-    Resource outputResource = new Resource(ResourceType.FILE, outputPath); // DO
-                                                                           // NOT
-                                                                           // prepend
-                                                                           // projectRoot
+    Resource outputResource = new Resource(ResourceType.FILE, outputPath);
 
     Delimiter delim = Delimiter.defaultDelimiter();
     ComputationRequest request = new ComputationRequest(inputResource,
