@@ -18,9 +18,9 @@ public class NetworkClient {
     // allow user to specify host and port
     System.out.print("Enter server host (default localhost): ");
     String host = scanner.nextLine();
-    if (host.isEmpty())
+    if (host.isEmpty()) {
       host = "localhost";
-
+    }
     System.out.print("Enter server port (default 50051): ");
     String portStr = scanner.nextLine();
     int port = portStr.isEmpty() ? 50051 : Integer.parseInt(portStr);
@@ -57,9 +57,9 @@ public class NetworkClient {
 
     System.out.print("Enter delimiter (optional, default ','): ");
     String delim = scanner.nextLine();
-    if (delim.isEmpty())
+    if (delim.isEmpty()) {
       delim = ",";
-
+    }
     NetworkProto.Resource inputResource;
     if ("1".equals(choice)) {
       inputResource = NetworkProto.Resource.newBuilder()
@@ -68,8 +68,9 @@ public class NetworkClient {
       NetworkProto.Resource.Builder inBuilder = NetworkProto.Resource
           .newBuilder();
       inBuilder.setType(NetworkProto.ResourceType.CUSTOM);
-      for (int n : numbers)
+      for (int n : numbers) {
         inBuilder.addData(n);
+      }
       inputResource = inBuilder.build();
     }
 

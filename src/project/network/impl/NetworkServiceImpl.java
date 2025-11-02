@@ -142,7 +142,7 @@ public class NetworkServiceImpl
       case STREAM :
         return ResourceType.STREAM;
       default :
-        return ResourceType.FILE;// fallback
+        return ResourceType.FILE; // fallback
     }
   }
 }

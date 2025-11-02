@@ -126,8 +126,9 @@ public class NetworkAPI implements NetworkApi {
 
       if (storeResp.getStatus() != ApiStatus.SUCCESS) {
         String msg = storeResp.getMessage();
-        if (msg == null)
+        if (msg == null) {
           msg = "Failed to store results";
+        }
         return new ComputationResponse(ApiStatus.ERROR, new ArrayList<>(), msg);
       }
 
