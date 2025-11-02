@@ -53,16 +53,16 @@ public class TestUser {
    */
 
   public void run(String outputPath) {
-    // Load the test input file relative to this class
-    File inputFile = new File("test/testInputFile.test");
-    if (!inputFile.exists()) {
-      inputFile = new File(
-          System.getProperty("user.dir") + "/test/testInputFile.test");
-    }
+    // Only fix input path
+    String projectRoot = System.getProperty("user.dir");
+    String inputPath = projectRoot + File.separator + "test" + File.separator
+        + "testInputFile.test";
 
-    String inputPath = inputFile.getAbsolutePath();
     Resource inputResource = new Resource(ResourceType.FILE, inputPath);
-    Resource outputResource = new Resource(ResourceType.FILE, outputPath);
+    Resource outputResource = new Resource(ResourceType.FILE, outputPath); // DO
+                                                                           // NOT
+                                                                           // prepend
+                                                                           // projectRoot
 
     Delimiter delim = Delimiter.defaultDelimiter();
     ComputationRequest request = new ComputationRequest(inputResource,
@@ -72,6 +72,10 @@ public class TestUser {
     if (response.getStatus() != ApiStatus.SUCCESS) {
       System.out.println("Compute failed: " + response.getMessage());
     }
+
+    File f = new File(outputPath);
+    System.out.println(
+        "Output exists? " + f.exists() + ", path = " + f.getAbsolutePath());
   }
 
 }

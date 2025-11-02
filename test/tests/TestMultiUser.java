@@ -90,9 +90,11 @@ public class TestMultiUser {
   private List<String> loadAllOutput(String prefix, int numThreads)
       throws IOException {
     List<String> result = new ArrayList<>();
+    String projectRoot = System.getProperty("user.dir");
+
     for (int i = 0; i < numThreads; i++) {
-      File multiThreadedOut = new File(prefix + i);
-      result.addAll(Files.readAllLines(multiThreadedOut.toPath()));
+      File file = new File(projectRoot + File.separator + prefix + i);
+      result.addAll(Files.readAllLines(file.toPath()));
     }
     return result;
   }
