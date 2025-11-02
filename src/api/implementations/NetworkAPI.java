@@ -119,8 +119,10 @@ public class NetworkAPI implements NetworkApi {
           request.getOutputResource(), resultBatch, request.getDelimiter()));
 
       if (storeResp.getStatus() != ApiStatus.SUCCESS) {
-        return new ComputationResponse(ApiStatus.ERROR, new ArrayList<>(),
-            "Failed to store results");
+        String msg = storeResp.getMessage();
+        if (msg == null)
+          msg = "Failed to store results";
+        return new ComputationResponse(ApiStatus.ERROR, new ArrayList<>(), msg);
       }
 
       // return ComputationResponse to the user, results stored in a

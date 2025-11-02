@@ -2,6 +2,7 @@ package api.implementations;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -100,18 +101,21 @@ public class ProcessAPI implements ProcessApi {
    */
   private LoadResponse loadFromFile(Resource src, Delimiter delimiter) {
     try {
-      // validate resource uri
-      if (src.getUri() == null || !Files.exists(Paths.get(src.getUri()))) {
-        throw new IllegalArgumentException(
-            "File " + src.getUri() + " does not exist");
-      }
-      // validate resource is readable
-      if (!Files.isReadable(Paths.get(src.getUri()))) {
-        throw new IllegalArgumentException(
-            "File is not readable: " + src.getUri());
+      if (src.getUri() == null) {
+        throw new IllegalArgumentException("File URI cannot be null");
       }
 
-      String content = Files.readString(Paths.get(src.getUri()));
+      // Just get path as is; relative paths go to project root
+      Path path = Paths.get(src.getUri().trim());
+
+      if (!Files.exists(path)) {
+        throw new IllegalArgumentException("File " + path + " does not exist");
+      }
+      if (!Files.isReadable(path)) {
+        throw new IllegalArgumentException("File is not readable: " + path);
+      }
+
+      String content = Files.readString(path);
       String[] tokens = content.split(delimiter.getValue());
 
       List<Integer> data = Arrays.stream(tokens).map(String::trim)
@@ -122,15 +126,12 @@ public class ProcessAPI implements ProcessApi {
           Delimiter.defaultDelimiter(), "Loaded successfully");
 
     } catch (IllegalArgumentException e) {
-      // catch invalid file uri or unreadable file
       return new LoadResponse(ApiStatus.ERROR, new ArrayList<>(),
           Delimiter.defaultDelimiter(), "Invalid file: " + e.getMessage());
     } catch (IOException e) {
-      // catch error reading file
       return new LoadResponse(ApiStatus.ERROR, new ArrayList<>(),
           Delimiter.defaultDelimiter(), "I/O error: " + e.getMessage());
     } catch (Exception e) {
-      // catch unexpected
       return new LoadResponse(ApiStatus.ERROR, new ArrayList<>(),
           Delimiter.defaultDelimiter(), "Unexpected error: " + e.getMessage());
     }
@@ -150,34 +151,27 @@ public class ProcessAPI implements ProcessApi {
   private StoreResponse storeToFile(Resource<?> dest, List<?> batch,
       Delimiter delimiter) {
     try {
-      // Validate resource URI before writing
       if (dest.getUri() == null) {
         throw new IllegalArgumentException("Destination URI cannot be null");
       }
-      if (dest.getType() == ResourceType.FILE
-          && !Files.exists(Paths.get(dest.getUri()))) {
-        // if file doesn't exist create parent directories
-        Paths.get(dest.getUri()).getParent().toFile().mkdirs();
-      }
 
-      // join batch items into string w/ delim
+      // Just write directly to the file; relative paths go to project root
+      Path path = Paths.get(dest.getUri().trim());
+
       String joined = batch.stream().map(Object::toString)
           .collect(Collectors.joining(delimiter.getValue()));
 
-      Files.writeString(Paths.get(dest.getUri()), joined);
+      Files.writeString(path, joined);
 
       return new StoreResponse(ApiStatus.SUCCESS, dest, "Stored successfully");
 
     } catch (IllegalArgumentException e) {
-      // catch invalid file
       return new StoreResponse(ApiStatus.ERROR, dest,
           "Invalid file: " + e.getMessage());
     } catch (IOException e) {
-      // catch error writing to file
       return new StoreResponse(ApiStatus.ERROR, dest,
           "I/O error: " + e.getMessage());
     } catch (Exception e) {
-      // catch unexpected
       return new StoreResponse(ApiStatus.ERROR, dest,
           "Unexpected error: " + e.getMessage());
     }

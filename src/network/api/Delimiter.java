@@ -2,7 +2,7 @@ package network.api;
 
 /**
  * This enum controls the allowed delimiters and handles setting a default one
- * when not specified by the user
+ * when not specified by the user. Options: COMMA, COLON, SEMICOLON, PIPE
  */
 public enum Delimiter {
   COMMA(","), COLON(":"), SEMICOLON(";"), PIPE("|");
