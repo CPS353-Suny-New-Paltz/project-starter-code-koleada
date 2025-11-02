@@ -25,6 +25,7 @@ import shared.stuff.Resource;
  */
 public class NetworkAPI implements NetworkApi {
 
+
   private ProcessApi readWrite;
 
   private ConceptualAPI compute;
@@ -32,11 +33,13 @@ public class NetworkAPI implements NetworkApi {
   public NetworkAPI() {
     // will need to communicate with the ProcessAPI to pass instructions to the
     // Data Storage System
+
     this.readWrite = new ProcessApiGrpcClient("localhost", 50052); // GRPC
                                                                    // process
                                                                    // client,
                                                                    // implements
                                                                    // PRocessApi
+
 
     // Will also need to talk to the computation section to perform
     // calculations,
