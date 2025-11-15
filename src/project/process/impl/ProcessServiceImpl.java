@@ -1,5 +1,7 @@
 package project.process.impl;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,6 +49,14 @@ public class ProcessServiceImpl
       LoadRequest loadReq = new LoadRequest(resource, delim);
       LoadResponse loadResp = processApi.load(loadReq);
 
+      if (loadResp == null) {
+        throw new IllegalStateException(
+            "processApi.load returned null for resource="
+                + (request.getResource() != null
+                    ? request.getResource().toString()
+                    : "null"));
+      }
+
       ProcessProto.LoadResponse.Builder builder = ProcessProto.LoadResponse
           .newBuilder().setStatus(convertStatus(loadResp.getStatus()))
           .setMessage(loadResp.getMessage());
@@ -69,9 +79,31 @@ public class ProcessServiceImpl
       responseObserver.onCompleted();
 
     } catch (Exception e) {
+      /*
+       * ProcessProto.LoadResponse resp = ProcessProto.LoadResponse.newBuilder()
+       * .setStatus(ProcessProto.ApiStatus.ERROR)
+       * .setMessage("Unexpected error: " + e.getMessage()).build();
+       * responseObserver.onNext(resp); responseObserver.onCompleted();
+       */
+
+      // print full stack to server log
+      e.printStackTrace(System.err);
+
+      // build a message that includes the exception class + short message
+      String shortMsg = (e.getMessage() != null)
+          ? e.getMessage()
+          : e.toString();
+
+      // If you want the full stacktrace in the proto message (useful in dev),
+      // otherwise include just the class + message.
+      StringWriter sw = new StringWriter();
+      e.printStackTrace(new PrintWriter(sw));
+      String fullTrace = sw.toString();
+
       ProcessProto.LoadResponse resp = ProcessProto.LoadResponse.newBuilder()
           .setStatus(ProcessProto.ApiStatus.ERROR)
-          .setMessage("Unexpected error: " + e.getMessage()).build();
+          .setMessage("Unexpected error: " + shortMsg + "\n" + fullTrace)
+          .build();
       responseObserver.onNext(resp);
       responseObserver.onCompleted();
     }

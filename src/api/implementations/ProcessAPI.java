@@ -42,7 +42,7 @@ public class ProcessAPI implements ProcessApi {
       }
       if (src.getType() == ResourceType.CUSTOM) {
         return new LoadResponse(ApiStatus.SUCCESS, src.getData(),
-            request.getDelimiter(), null);
+            request.getDelimiter(), "Loaded successfully");
       }
       return new LoadResponse(ApiStatus.ERROR, new ArrayList<>(),
           Delimiter.defaultDelimiter(),
@@ -72,7 +72,8 @@ public class ProcessAPI implements ProcessApi {
       }
       if (dest.getType() == ResourceType.CUSTOM) {
         dest.setData(request.getPayload());
-        return new StoreResponse(ApiStatus.SUCCESS, dest, null);
+        return new StoreResponse(ApiStatus.SUCCESS, dest,
+            "Stored successfully");
       }
       return new StoreResponse(ApiStatus.ERROR, dest,
           "Unsupported resource type or missing URI");
