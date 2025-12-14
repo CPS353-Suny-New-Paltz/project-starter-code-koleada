@@ -39,8 +39,9 @@ public class FastPbkdf2 {
   private static byte[] bigIntToBytes(BigInteger input) {
     // preserve original behavior (fixed size), but now for BigInteger
     byte[] bytes = input.toByteArray();
-    if (bytes.length >= 32)
+    if (bytes.length >= 32) {
       return bytes;
+    }
 
     // left-pad to 32 bytes for SHA-256 input consistency
     byte[] padded = new byte[32];

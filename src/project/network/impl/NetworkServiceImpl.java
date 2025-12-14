@@ -42,12 +42,15 @@ public class NetworkServiceImpl
           .newBuilder();
       respBuilder.setStatus(
           NetworkProto.ApiStatus.valueOf(loginResp.getStatus().name()));
-      if (loginResp.getSessionToken() != null)
+      if (loginResp.getSessionToken() != null) {
         respBuilder.setSessionToken(loginResp.getSessionToken());
-      if (loginResp.getUserId() != null)
+      }
+      if (loginResp.getUserId() != null) {
         respBuilder.setUserId(loginResp.getUserId());
-      if (loginResp.getMessage() != null)
+      }
+      if (loginResp.getMessage() != null) {
         respBuilder.setMessage(loginResp.getMessage());
+      }
 
       responseObserver.onNext(respBuilder.build());
       responseObserver.onCompleted();

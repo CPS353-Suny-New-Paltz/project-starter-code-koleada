@@ -18,8 +18,9 @@ public class NetworkClient {
     // --- Host & Port ---
     System.out.print("Enter server host (default localhost): ");
     String host = scanner.nextLine().trim();
-    if (host.isEmpty())
+    if (host.isEmpty()) {
       host = "localhost";
+    }
 
     System.out.print("Enter server port (default 50051): ");
     String portStr = scanner.nextLine().trim();
@@ -74,8 +75,9 @@ public class NetworkClient {
       System.out.print("Enter numbers separated by spaces: ");
       String line = scanner.nextLine();
       for (String s : line.trim().split("\\s+")) {
-        if (!s.isEmpty())
+        if (!s.isEmpty()) {
           numbers.add(new BigInteger(s));
+        }
       }
     }
 

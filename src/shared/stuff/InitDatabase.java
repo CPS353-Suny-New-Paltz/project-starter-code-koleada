@@ -14,8 +14,8 @@ import javax.crypto.spec.PBEKeySpec;
 
 public class InitDatabase {
 
-  private static final String DB_URL = "jdbc:sqlite:auth.db";// create auth.db
-                                                             // in project root
+  private static final String DB_URL = "jdbc:sqlite:auth.db"; // create auth.db
+                                                              // in project root
   private static final String ADMIN_USERNAME = "admin";
   private static final String ADMIN_PASSWORD = "admin"; // will be hashed
 
