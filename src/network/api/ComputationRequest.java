@@ -1,6 +1,7 @@
 package network.api;
 
 import shared.stuff.Resource;
+
 /**
  * 
  * Request for a computation, containing input and output resources.
@@ -34,11 +35,11 @@ public class ComputationRequest {
     this.delimiter = delimiter;
   }
 
-  public Resource<?> getInputResource() {
+  public Resource getInputResource() {
     return inputResource;
   }
 
-  public Resource<?> getOutputResource() {
+  public Resource getOutputResource() {
     return outputResource;
   }
 

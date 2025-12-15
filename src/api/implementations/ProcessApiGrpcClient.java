@@ -1,5 +1,6 @@
 package api.implementations;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,11 +18,10 @@ import shared.stuff.ApiStatus;
 import shared.stuff.Resource;
 
 /**
- * Grpc process client - keeps same method signatures as ProcessAPI but uses the
+ * GRPC process client - keeps same method signatures as ProcessAPI but uses the
  * GRPC server to perform the tasks
  */
 public class ProcessApiGrpcClient implements ProcessApi {
-
   private final ProcessServiceGrpc.ProcessServiceBlockingStub stub;
 
   public ProcessApiGrpcClient(String host, int port) {
@@ -32,12 +32,9 @@ public class ProcessApiGrpcClient implements ProcessApi {
 
   @Override
   public LoadResponse load(LoadRequest request) {
-    Delimiter delimiterToUse;
-    if (request.getDelimiter() != null) {
-      delimiterToUse = request.getDelimiter();
-    } else {
-      delimiterToUse = Delimiter.defaultDelimiter();
-    }
+    Delimiter delimiterToUse = request.getDelimiter() != null
+        ? request.getDelimiter()
+        : Delimiter.defaultDelimiter();
 
     ProcessProto.LoadRequest.Builder protoReq = ProcessProto.LoadRequest
         .newBuilder();
@@ -46,75 +43,73 @@ public class ProcessApiGrpcClient implements ProcessApi {
 
     ProcessProto.LoadResponse protoResp = stub.load(protoReq.build());
 
-    Delimiter responseDelimiter;
-    if (request.getDelimiter() != null) {
-      responseDelimiter = request.getDelimiter();
-    } else {
-      responseDelimiter = Delimiter.defaultDelimiter();
-    }
+    String msg = protoResp.getMessage().isEmpty()
+        ? null
+        : protoResp.getMessage();
 
-    String msg = protoResp.getMessage();
-    if (msg.isEmpty()) {
-      msg = null;
+    // Convert protobuf string data to BigInteger
+    List<BigInteger> bigInts = new ArrayList<>();
+    for (String s : protoResp.getDataList()) {
+      if (s != null && !s.isEmpty()) {
+        bigInts.add(new BigInteger(s));
+      }
     }
 
     return new LoadResponse(convertStatus(protoResp.getStatus()),
-        new ArrayList<>(protoResp.getDataList()), responseDelimiter, msg);
+        new ArrayList<>(bigInts), delimiterToUse, msg);
   }
 
   @Override
   public StoreResponse store(StoreRequest request) {
-    Delimiter delimiterToUse;
-    if (request.getDelimiter() != null) {
-      delimiterToUse = request.getDelimiter();
-    } else {
-      delimiterToUse = Delimiter.defaultDelimiter();
-    }
+    Delimiter delimiterToUse = request.getDelimiter() != null
+        ? request.getDelimiter()
+        : Delimiter.defaultDelimiter();
 
     ProcessProto.StoreRequest.Builder protoReq = ProcessProto.StoreRequest
         .newBuilder();
     protoReq.setResource(convertToProtoResource(request.getDestination()));
     protoReq.setDelimiter(delimiterToUse.getValue());
 
-    // Ensure payload is List<Integer> for protobuf
-    List<Integer> payloadInt = new ArrayList<>();
-    for (Object obj : request.getPayload()) {
-      payloadInt.add((Integer) obj);
+    // Convert List<BigInteger> payload to List<String> for protobuf
+    List<String> payloadStr = new ArrayList<>();
+    for (BigInteger bi : request.getPayload()) {
+      payloadStr.add(bi.toString());
     }
-    protoReq.addAllData(payloadInt);
+    protoReq.addAllData(payloadStr);
 
     ProcessProto.StoreResponse protoResp = stub.store(protoReq.build());
 
-    String msg = protoResp.getMessage();
-    if (msg.isEmpty()) {
-      msg = null;
-    }
+    String msg = protoResp.getMessage().isEmpty()
+        ? null
+        : protoResp.getMessage();
 
     return new StoreResponse(convertStatus(protoResp.getStatus()),
         request.getDestination(), msg);
   }
 
-  private ProcessProto.Resource convertToProtoResource(Resource<?> resource) {
+  private ProcessProto.Resource convertToProtoResource(Resource resource) {
     ProcessProto.Resource.Builder builder = ProcessProto.Resource.newBuilder();
 
     switch (resource.getType()) {
       case FILE :
         builder.setType(ProcessProto.ResourceType.FILE)
-            .setUri((String) resource.getUri());
+            .setUri(resource.getUri());
         break;
       case DATABASE :
         builder.setType(ProcessProto.ResourceType.DATABASE)
-            .setUri((String) resource.getUri());
+            .setUri(resource.getUri());
         break;
       case STREAM :
         builder.setType(ProcessProto.ResourceType.STREAM)
-            .setUri((String) resource.getUri());
+            .setUri(resource.getUri());
         break;
       case CUSTOM :
         builder.setType(ProcessProto.ResourceType.CUSTOM);
-        List<Integer> dataList = new ArrayList<>();
-        for (Object obj : resource.getData()) {
-          dataList.add((Integer) obj);
+        List<String> dataList = new ArrayList<>();
+        if (resource.getData() != null) {
+          for (BigInteger bi : resource.getData()) {
+            dataList.add(bi.toString());
+          }
         }
         builder.addAllData(dataList);
         break;

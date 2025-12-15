@@ -1,5 +1,6 @@
 package project.network.impl;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -12,17 +13,17 @@ import project.network.grpc.NetworkServiceGrpc;
 public class NetworkClient {
 
   public static void main(String[] args) {
-
     Scanner scanner = new Scanner(System.in);
 
-    // allow user to specify host and port
+    // --- Host & Port ---
     System.out.print("Enter server host (default localhost): ");
-    String host = scanner.nextLine();
+    String host = scanner.nextLine().trim();
     if (host.isEmpty()) {
       host = "localhost";
     }
+
     System.out.print("Enter server port (default 50051): ");
-    String portStr = scanner.nextLine();
+    String portStr = scanner.nextLine().trim();
     int port = portStr.isEmpty() ? 50051 : Integer.parseInt(portStr);
 
     ManagedChannel channel = ManagedChannelBuilder.forAddress(host, port)
@@ -31,53 +32,79 @@ public class NetworkClient {
     NetworkServiceGrpc.NetworkServiceBlockingStub stub = NetworkServiceGrpc
         .newBlockingStub(channel);
 
-    // Ask user if input is from file or typed numbers
+    // -- Login --
+    System.out.print("Enter username: ");
+    String username = scanner.nextLine().trim();
+
+    System.out.print("Enter password: ");
+    String password = scanner.nextLine().trim();
+
+    String hashedPassword = null;
+    try {
+      hashedPassword = shared.stuff.InitDatabase.hashPassword(password);
+    } catch (Exception e) {
+      System.err.println("Failed to hash password: " + e.getMessage());
+      System.exit(1);
+    }
+
+    NetworkProto.LoginRequest loginRequest = NetworkProto.LoginRequest
+        .newBuilder().setUsername(username).setHashedPassword(hashedPassword)
+        .build();
+
+    NetworkProto.LoginResponse loginResponse = stub.login(loginRequest);
+
+    if (loginResponse.getStatus() != NetworkProto.ApiStatus.SUCCESS) {
+      System.err.println("Login failed: " + loginResponse.getMessage());
+      System.exit(1);
+    }
+
+    System.out.println(
+        "Login successful. SessionToken: " + loginResponse.getSessionToken());
+
+    // --- Input ---
     System.out.print("Input type? (1 = file, 2 = numbers): ");
     String choice = scanner.nextLine().trim();
 
     String inputUri = null;
-    List<Integer> numbers = new ArrayList<>();
+    List<BigInteger> numbers = new ArrayList<>();
 
     if ("1".equals(choice)) {
-      System.out.print("Enter input file explicit path: ");
+      System.out.print("Enter input file path: ");
       inputUri = scanner.nextLine();
     } else {
       System.out.print("Enter numbers separated by spaces: ");
       String line = scanner.nextLine();
       for (String s : line.trim().split("\\s+")) {
         if (!s.isEmpty()) {
-          numbers.add(Integer.parseInt(s));
+          numbers.add(new BigInteger(s));
         }
       }
     }
 
-    // MUST be explicit path!!
-    System.out.print("Enter output file explicit path: ");
+    // --- Output ---
+    System.out.print("Enter output file path: ");
     String outputFile = scanner.nextLine();
 
-    System.out.print("Enter delimiter (optional, default ','): ");
+    System.out.print("Enter delimiter: ");
     String delim = scanner.nextLine();
-    if (delim.isEmpty()) {
-      delim = ",";
-    }
+
+    // --- Build input resource ---
     NetworkProto.Resource inputResource;
     if ("1".equals(choice)) {
       inputResource = NetworkProto.Resource.newBuilder()
           .setType(NetworkProto.ResourceType.FILE).setUri(inputUri).build();
     } else {
       NetworkProto.Resource.Builder inBuilder = NetworkProto.Resource
-          .newBuilder();
-      inBuilder.setType(NetworkProto.ResourceType.CUSTOM);
-      for (int n : numbers) {
-        inBuilder.addData(n);
+          .newBuilder().setType(NetworkProto.ResourceType.CUSTOM);
+      for (BigInteger bi : numbers) {
+        inBuilder.addData(bi.toString());
       }
       inputResource = inBuilder.build();
     }
 
+    // --- Build output resource ---
     NetworkProto.Resource outputResource = NetworkProto.Resource.newBuilder()
-        .setType(NetworkProto.ResourceType.FILE) // must be FILE for ProcessAPI
-                                                 // to write
-        .setUri(outputFile).build();
+        .setType(NetworkProto.ResourceType.FILE).setUri(outputFile).build();
 
     NetworkProto.ComputationRequest request = NetworkProto.ComputationRequest
         .newBuilder().setInputResource(inputResource)

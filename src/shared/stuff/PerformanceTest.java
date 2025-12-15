@@ -1,8 +1,6 @@
 package shared.stuff;
 
-/**
- * Simple class that runs compute so we can gather performance data, used to locate performance issues
- */
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,13 +11,17 @@ import network.api.ComputationRequest;
 import network.api.ComputationResponse;
 import network.api.Delimiter;
 
+/**
+ * Simple class that runs compute so we can gather performance data, used to
+ * locate performance issues
+ */
 public class PerformanceTest {
 
   public static void main(String[] args) {
     // Prepare fake resources with small test data
-    List<Integer> inputData = new ArrayList<>();
+    List<BigInteger> inputData = new ArrayList<>();
     for (int i = 0; i < 10; i++) {
-      inputData.add(i);
+      inputData.add(BigInteger.valueOf(i));
     }
 
     Resource inputResource = new Resource(ResourceType.CUSTOM, inputData);

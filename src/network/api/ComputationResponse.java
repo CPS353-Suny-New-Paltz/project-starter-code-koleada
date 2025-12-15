@@ -1,5 +1,6 @@
 package network.api;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import shared.stuff.ApiStatus;
@@ -10,10 +11,10 @@ import shared.stuff.ApiStatus;
  */
 public class ComputationResponse {
   private final ApiStatus status;
-  private final List<Integer> results;
+  private final List<BigInteger> results;
   private final String message;
 
-  public ComputationResponse(ApiStatus status, List resultBatch,
+  public ComputationResponse(ApiStatus status, List<BigInteger> resultBatch,
       String message) {
     this.status = status;
     this.results = resultBatch;
@@ -24,7 +25,7 @@ public class ComputationResponse {
     return status;
   }
 
-  public List getResults() {
+  public List<BigInteger> getResults() {
     return results;
   }
 

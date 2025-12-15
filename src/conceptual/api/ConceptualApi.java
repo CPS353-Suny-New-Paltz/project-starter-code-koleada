@@ -15,19 +15,19 @@ public interface ConceptualApi<T> {
    * 
    * @param jobId
    * 
-   * @return JobResponse containing the status, result will always be -1 for
+   * @return JobResponse containing the status, result will always be null for
    *         status checks
    */
-  JobResponse checkStatus(String jobId);
+  JobResponse<T> checkStatus(String jobId);
 
   /**
    * Performs the actual computations
    * 
    * @param input
    *          to the computation
-   * @return result from the computation, -1 if computation failed
+   * @return result from the computation, null if computation failed
    * @throws NoSuchAlgorithmException
    */
-  public JobResponse performComputation(int input)
+  public JobResponse<T> performComputation(T input)
       throws NoSuchAlgorithmException;
 }

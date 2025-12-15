@@ -1,5 +1,6 @@
 package checkpointtests;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import api.implementations.ConceptualAPI;
@@ -17,7 +18,7 @@ public class ManualTestingFramework {
   public static final String OUTPUT = "manualTestOutput.txt";
 
   public static void main(String[] args) {
-    // TODO 1: Set up APIs
+    // Set up APIs
     ProcessAPI processApi = new ProcessAPI();
     ConceptualAPI conceptualApi = new ConceptualAPI();
     NetworkAPI networkApi = new NetworkAPI();
@@ -25,9 +26,9 @@ public class ManualTestingFramework {
     networkApi.setReadWrite(processApi);
     networkApi.setCompute(conceptualApi);
 
-    // TODO 2: Run a computation with input file and output file
-    Resource inputRes = new Resource<>(ResourceType.FILE, INPUT);
-    Resource outputRes = new Resource<>(ResourceType.FILE, OUTPUT);
+    // Use FILE resources
+    Resource inputRes = new Resource(ResourceType.FILE, INPUT);
+    Resource outputRes = new Resource(ResourceType.FILE, OUTPUT);
 
     ComputationRequest request = new ComputationRequest(inputRes, outputRes,
         Delimiter.COMMA);
@@ -36,8 +37,8 @@ public class ManualTestingFramework {
 
     System.out.println("Computation finished with status: " + resp.getStatus());
     System.out.println("Results:");
-    List<Integer> ints = resp.getResults();
-    for (int i : ints) {
+    List<BigInteger> results = resp.getResults();
+    for (BigInteger i : results) {
       System.out.println(i);
     }
     System.out.println("Message: " + resp.getMessage());

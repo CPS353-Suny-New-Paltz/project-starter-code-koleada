@@ -8,13 +8,13 @@ import java.util.UUID;
  * @param <T>
  *          the type of input data
  */
-public class ExampleJob implements Job {
+public class ExampleJob<T> implements Job<T> {
 
   public String jobId;
   public String description;
-  public int input;
+  public T input;
 
-  public ExampleJob(String description, int input) {
+  public ExampleJob(String description, T input) {
     this.jobId = UUID.randomUUID().toString();
     this.description = description;
     this.input = input;
@@ -26,7 +26,7 @@ public class ExampleJob implements Job {
   }
 
   @Override
-  public int getInput() {
+  public T getInput() {
     return input;
   }
 

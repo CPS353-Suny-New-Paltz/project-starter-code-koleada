@@ -1,5 +1,6 @@
 package project.network.impl;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,44 +26,104 @@ public class NetworkServiceImpl
   }
 
   @Override
+  public void login(NetworkProto.LoginRequest protoReq,
+      StreamObserver<NetworkProto.LoginResponse> responseObserver) {
+
+    try {
+      String username = protoReq.getUsername();
+      String hashedPassword = protoReq.getHashedPassword();
+
+      // Use NetworkAPI login method
+      network.api.LoginRequest loginReq = new network.api.LoginRequest(username,
+          hashedPassword);
+      network.api.LoginResponse loginResp = networkAPI.login(loginReq);
+
+      NetworkProto.LoginResponse.Builder respBuilder = NetworkProto.LoginResponse
+          .newBuilder();
+      respBuilder.setStatus(
+          NetworkProto.ApiStatus.valueOf(loginResp.getStatus().name()));
+      if (loginResp.getSessionToken() != null) {
+        respBuilder.setSessionToken(loginResp.getSessionToken());
+      }
+      if (loginResp.getUserId() != null) {
+        respBuilder.setUserId(loginResp.getUserId());
+      }
+      if (loginResp.getMessage() != null) {
+        respBuilder.setMessage(loginResp.getMessage());
+      }
+
+      responseObserver.onNext(respBuilder.build());
+      responseObserver.onCompleted();
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      responseObserver.onError(e);
+    }
+  }
+
+  @Override
+  public void logout(NetworkProto.LogoutRequest protoReq,
+      StreamObserver<NetworkProto.LogoutResponse> responseObserver) {
+
+    try {
+      network.api.LogoutRequest logoutReq = new network.api.LogoutRequest(
+          protoReq.getSessionToken());
+      network.api.LogoutResponse logoutResp = networkAPI.logout(logoutReq);
+
+      NetworkProto.LogoutResponse.Builder respBuilder = NetworkProto.LogoutResponse
+          .newBuilder();
+      respBuilder.setStatus(
+          NetworkProto.ApiStatus.valueOf(logoutResp.getStatus().name()));
+      if (logoutResp.getMessage() != null) {
+        respBuilder.setMessage(logoutResp.getMessage());
+      }
+
+      responseObserver.onNext(respBuilder.build());
+      responseObserver.onCompleted();
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      responseObserver.onError(e);
+    }
+  }
+
+  @Override
   public void compute(NetworkProto.ComputationRequest protoReq,
       StreamObserver<NetworkProto.ComputationResponse> responseObserver) {
 
     try {
-
-      // Input resource
-      NetworkProto.Resource protoIn = null;
-      if (protoReq.hasInputResource()) {
-        protoIn = protoReq.getInputResource();
-      }
-
-      Resource<?> inputResource = null;
+      // --- Input resource ---
+      NetworkProto.Resource protoIn = protoReq.hasInputResource()
+          ? protoReq.getInputResource()
+          : null;
+      Resource inputResource = null;
       if (protoIn != null) {
         ResourceType rtype = fromProtoResourceType(protoIn.getType());
         if (rtype == ResourceType.CUSTOM) {
-          inputResource = new Resource<>(rtype,
-              new ArrayList<>(protoIn.getDataList()));
+          List<BigInteger> data = new ArrayList<>();
+          for (String s : protoIn.getDataList()) {
+            data.add(new BigInteger(s));
+          }
+          inputResource = new Resource(rtype, data);
         } else {
-          inputResource = new Resource<>(rtype, protoIn.getUri());
+          inputResource = new Resource(rtype, protoIn.getUri());
         }
       }
-      // Output resource
-      NetworkProto.Resource protoOut = null;
-      if (protoReq.hasOutputResource()) {
-        protoOut = protoReq.getOutputResource();
-      }
 
-      Resource<?> outputResource = null;
+      // --- Output resource ---
+      NetworkProto.Resource protoOut = protoReq.hasOutputResource()
+          ? protoReq.getOutputResource()
+          : null;
+      Resource outputResource = null;
       if (protoOut != null) {
         ResourceType rtype = fromProtoResourceType(protoOut.getType());
-        outputResource = new Resource<>(rtype, protoOut.getUri());
+        outputResource = new Resource(rtype, protoOut.getUri());
       }
 
-      // Delimiter
-      Delimiter delim = Delimiter.defaultDelimiter(); // default
+      // --- Delimiter ---
+      Delimiter delim = Delimiter.defaultDelimiter();
       if (protoReq.hasDelimiter() && !protoReq.getDelimiter().isEmpty()) {
-        String delimStr = protoReq.getDelimiter();
-        switch (delimStr.trim()) {
+        switch (protoReq.getDelimiter().trim()) {
           case "," :
             delim = Delimiter.COMMA;
             break;
@@ -77,17 +138,24 @@ public class NetworkServiceImpl
             break;
           default :
             delim = Delimiter.defaultDelimiter();
-            break;
         }
       }
 
+      // --- Build domain request ---
       ComputationRequest domainReq = new ComputationRequest(inputResource,
           outputResource, delim);
 
-      // Call normala networkAPI
-      ComputationResponse domainResp = networkAPI.compute(domainReq);
+      // --- Check login before compute ---
+      ComputationResponse domainResp;
+      if (networkAPI.getSessionToken() == null
+          || networkAPI.getLoggedInUserId() == null) {
+        domainResp = new ComputationResponse(ApiStatus.ERROR, new ArrayList<>(),
+            "User must be logged in to perform compute");
+      } else {
+        domainResp = networkAPI.compute(domainReq);
+      }
 
-      // Build proto response
+      // --- Build proto response ---
       NetworkProto.ComputationResponse.Builder respBuilder = NetworkProto.ComputationResponse
           .newBuilder();
 
@@ -104,27 +172,21 @@ public class NetworkServiceImpl
       }
 
       // Results
-      List<Integer> results = domainResp.getResults();
+      List<BigInteger> results = domainResp.getResults();
       if (results != null) {
-        respBuilder.addAllResults(results);
+        for (BigInteger bi : results) {
+          respBuilder.addResults(bi.toString());
+        }
       }
 
-      // Include actual ProcessAPI error message if present
-      if (domainResp.getMessage() != null
-          && !domainResp.getMessage().isEmpty()) {
-        respBuilder.setMessage(domainResp.getMessage());
-      } else {
-        respBuilder.setMessage("");
-      }
-
-      System.out.println("Computation completed. Status: "
-          + respBuilder.getStatus() + ", message: " + respBuilder.getMessage());
+      // Message
+      respBuilder.setMessage(
+          domainResp.getMessage() != null ? domainResp.getMessage() : "");
 
       responseObserver.onNext(respBuilder.build());
       responseObserver.onCompleted();
 
     } catch (Exception e) {
-      System.err.println("Exception in Compute: " + e.getMessage());
       e.printStackTrace();
       responseObserver.onError(e);
     }
@@ -142,7 +204,7 @@ public class NetworkServiceImpl
       case STREAM :
         return ResourceType.STREAM;
       default :
-        return ResourceType.FILE; // fallback
+        return ResourceType.FILE;
     }
   }
 }

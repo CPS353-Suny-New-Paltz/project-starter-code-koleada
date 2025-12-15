@@ -1,6 +1,7 @@
 package api.implementations;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -26,7 +27,6 @@ import shared.stuff.ResourceType;
 public class ProcessAPI implements ProcessApi {
 
   public ProcessAPI() {
-
   }
 
   @Override
@@ -35,25 +35,29 @@ public class ProcessAPI implements ProcessApi {
       if (request == null) {
         throw new IllegalArgumentException("Request cannot be null");
       }
+
       Resource src = request.getSource();
+
       if (src.getType() == ResourceType.FILE && src.getUri() != null) {
-        // delegate to helper, which already has its own exception handling
         return loadFromFile(src, request.getDelimiter());
       }
+
       if (src.getType() == ResourceType.CUSTOM) {
-        return new LoadResponse(ApiStatus.SUCCESS, src.getData(),
+        List<BigInteger> data = src.getData() != null
+            ? src.getData()
+            : new ArrayList<>();
+        return new LoadResponse(ApiStatus.SUCCESS, new ArrayList<>(data),
             request.getDelimiter(), "Loaded successfully");
       }
+
       return new LoadResponse(ApiStatus.ERROR, new ArrayList<>(),
           Delimiter.defaultDelimiter(),
           "Unsupported resource type or missing URI");
 
     } catch (IllegalArgumentException e) {
-      // null req
       return new LoadResponse(ApiStatus.ERROR, new ArrayList<>(),
           Delimiter.defaultDelimiter(), "Invalid request: " + e.getMessage());
     } catch (Exception e) {
-      // unexpected exceptions
       return new LoadResponse(ApiStatus.ERROR, new ArrayList<>(),
           Delimiter.defaultDelimiter(), "Unexpected error: " + e.getMessage());
     }
@@ -65,27 +69,28 @@ public class ProcessAPI implements ProcessApi {
       if (request == null) {
         throw new IllegalArgumentException("Request cannot be null");
       }
+
       Resource dest = request.getDestination();
+      List<BigInteger> batch = request.getPayload();
+
       if (dest.getType() == ResourceType.FILE && dest.getUri() != null) {
-        // delegate to helper, which already has its own exception handling
-        return storeToFile(dest, request.getPayload(), request.getDelimiter());
+        return storeToFile(dest, batch, request.getDelimiter());
       }
+
       if (dest.getType() == ResourceType.CUSTOM) {
-        dest.setData(request.getPayload());
+        dest.setData(new ArrayList<>(batch));
         return new StoreResponse(ApiStatus.SUCCESS, dest,
             "Stored successfully");
       }
+
       return new StoreResponse(ApiStatus.ERROR, dest,
           "Unsupported resource type or missing URI");
 
     } catch (IllegalArgumentException e) {
-      // catch null request
       return new StoreResponse(ApiStatus.ERROR,
-          // if request is not null add the destination to the response
           request != null ? request.getDestination() : null,
           "Invalid request: " + e.getMessage());
     } catch (Exception e) {
-      // unexpected exceptions
       return new StoreResponse(ApiStatus.ERROR,
           request != null ? request.getDestination() : null,
           "Unexpected error: " + e.getMessage());
@@ -94,12 +99,6 @@ public class ProcessAPI implements ProcessApi {
 
   /**
    * Helper method to load data from a file
-   * 
-   * @param src,
-   *          Resource to read from
-   * @param delimiter
-   *          used to split data and add it to a List
-   * @return
    */
   private LoadResponse loadFromFile(Resource src, Delimiter delimiter) {
     try {
@@ -107,7 +106,6 @@ public class ProcessAPI implements ProcessApi {
         throw new IllegalArgumentException("File URI cannot be null");
       }
 
-      // Just get path as is; relative paths go to project root
       Path path = Paths.get(src.getUri().trim());
 
       if (!Files.exists(path)) {
@@ -118,20 +116,15 @@ public class ProcessAPI implements ProcessApi {
       }
 
       String content = Files.readString(path);
-      String regex = Pattern.quote(delimiter.getValue()); // got a super weird
-                                                          // error from using |
-                                                          // as a delim have to
-                                                          // escape special
-                                                          // chars
+      String regex = Pattern.quote(delimiter.getValue());
       String[] tokens = content.split(regex);
 
-      List<Integer> data = Arrays.stream(tokens).map(String::trim)
-          .filter(s -> !s.isEmpty()).map(Integer::parseInt)
+      List<BigInteger> data = Arrays.stream(tokens).map(String::trim)
+          .filter(s -> !s.isEmpty()).map(BigInteger::new)
           .collect(Collectors.toList());
 
       return new LoadResponse(ApiStatus.SUCCESS, new ArrayList<>(data),
-          delimiter, "Loaded successfully"); // <-- return the actual delimiter
-                                             // used
+          delimiter, "Loaded successfully");
 
     } catch (IllegalArgumentException e) {
       return new LoadResponse(ApiStatus.ERROR, new ArrayList<>(),
@@ -147,26 +140,17 @@ public class ProcessAPI implements ProcessApi {
 
   /**
    * Helper method to store data to a file
-   * 
-   * @param dest
-   *          the Resource which describes the file we are to write to
-   * @param batch
-   *          DataBatch<List> the data we write to the file
-   * @param delimiter
-   *          added in between each data element
-   * @return
    */
-  private StoreResponse storeToFile(Resource<?> dest, List<?> batch,
+  private StoreResponse storeToFile(Resource dest, List<BigInteger> batch,
       Delimiter delimiter) {
     try {
       if (dest.getUri() == null) {
         throw new IllegalArgumentException("Destination URI cannot be null");
       }
 
-      // Just write directly to the file; relative paths go to project root
       Path path = Paths.get(dest.getUri().trim());
 
-      String joined = batch.stream().map(Object::toString)
+      String joined = batch.stream().map(BigInteger::toString)
           .collect(Collectors.joining(delimiter.getValue()));
 
       Files.writeString(path, joined);
@@ -184,5 +168,4 @@ public class ProcessAPI implements ProcessApi {
           "Unexpected error: " + e.getMessage());
     }
   }
-
 }

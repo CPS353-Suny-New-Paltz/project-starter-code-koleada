@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Test-only in-memory output configuration Used to store data in
+ * Test-only in-memory output configuration used to store data.
  */
 public class TestOutputConfig {
 

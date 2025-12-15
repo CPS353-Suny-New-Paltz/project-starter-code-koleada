@@ -24,6 +24,10 @@ public final class LogoutResponse {
     return this.status == ApiStatus.SUCCESS;
   }
 
+  public String getMessage() {
+    return message;
+  }
+
   public ApiStatus getStatus() {
     return status;
   }

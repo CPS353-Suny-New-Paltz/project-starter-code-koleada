@@ -26,8 +26,9 @@ enum ResourceType {
 
 message Resource {
   optional ResourceType type = 1;
-  optional string uri = 2;          // For FILE/DATABASE/STREAM
-  repeated int32 data = 3;          // For CUSTOM
+  optional string uri = 2; // For FILE/DATABASE/STREAM
+  // Represent big integers as decimal strings in protobuf
+  repeated string data = 3; // For CUSTOM (each string holds decimal rep of big integer)
 }
 
 message LoadRequest {
@@ -37,13 +38,15 @@ message LoadRequest {
 
 message LoadResponse {
   optional ApiStatus status = 1;
-  repeated int32 data = 2;
+  // Big integers returned as decimal strings
+  repeated string data = 2;
   optional string message = 3;
 }
 
 message StoreRequest {
   optional Resource resource = 1;
-  repeated int32 data = 2;
+  // Big integers sent as decimal strings
+  repeated string data = 2;
   optional string delimiter = 3;
 }
 

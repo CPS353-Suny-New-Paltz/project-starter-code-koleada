@@ -1,6 +1,6 @@
 package shared.stuff;
 
-import java.nio.ByteBuffer;
+import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -16,9 +16,10 @@ public class FastPbkdf2 {
   private static final int OUTER_ITERATIONS = 1000;
   private static final int INNER_ITERATIONS = 10;
 
-  public static int compute(int input) throws NoSuchAlgorithmException {
+  public static BigInteger compute(BigInteger input)
+      throws NoSuchAlgorithmException {
 
-    byte[] value = intToBytes(input);
+    byte[] value = bigIntToBytes(input);
 
     MessageDigest md = MessageDigest.getInstance("SHA-256");
 
@@ -35,12 +36,27 @@ public class FastPbkdf2 {
     return normalizeResult(value);
   }
 
-  private static byte[] intToBytes(int input) {
-    return ByteBuffer.allocate(4).putInt(input).array();
+  private static byte[] bigIntToBytes(BigInteger input) {
+    // preserve original behavior (fixed size), but now for BigInteger
+    byte[] bytes = input.toByteArray();
+    if (bytes.length >= 32) {
+      return bytes;
+    }
+
+    // left-pad to 32 bytes for SHA-256 input consistency
+    byte[] padded = new byte[32];
+    System.arraycopy(bytes, 0, padded, 32 - bytes.length, bytes.length);
+    return padded;
   }
 
-  private static int normalizeResult(byte[] value) {
-    int result = ByteBuffer.wrap(value, 0, 4).getInt();
-    return Math.floorMod(result, Integer.MAX_VALUE - 1) + 1;
+  private static BigInteger normalizeResult(byte[] value) {
+    // turn entire digest into BigInteger
+    BigInteger out = new BigInteger(1, value);
+
+    // keep the same "range normalization" idea but using BigInteger
+    BigInteger mod = BigInteger.valueOf(Integer.MAX_VALUE - 1L);
+    BigInteger normalized = out.mod(mod).add(BigInteger.ONE);
+
+    return normalized;
   }
 }

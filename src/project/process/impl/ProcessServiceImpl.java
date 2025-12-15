@@ -2,6 +2,7 @@ package project.process.impl;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +19,8 @@ import shared.stuff.Resource;
 import shared.stuff.ResourceType;
 
 /**
- * gRPC wrapper around the existing ProcessAPI implementation
+ * gRPC wrapper around the existing ProcessAPI implementation Updated for
+ * non-generic Resource and BigInteger support
  */
 public class ProcessServiceImpl
     extends
@@ -33,6 +35,7 @@ public class ProcessServiceImpl
   @Override
   public void load(ProcessProto.LoadRequest request,
       StreamObserver<ProcessProto.LoadResponse> responseObserver) {
+
     try {
       if (request == null || request.getResource() == null) {
         ProcessProto.LoadResponse resp = ProcessProto.LoadResponse.newBuilder()
@@ -43,34 +46,23 @@ public class ProcessServiceImpl
         return;
       }
 
-      Resource<?> resource = convertProtoResource(request.getResource());
+      Resource resource = convertProtoResource(request.getResource());
       Delimiter delim = convertDelimiter(request.getDelimiter());
 
       LoadRequest loadReq = new LoadRequest(resource, delim);
       LoadResponse loadResp = processApi.load(loadReq);
 
-      if (loadResp == null) {
-        throw new IllegalStateException(
-            "processApi.load returned null for resource="
-                + (request.getResource() != null
-                    ? request.getResource().toString()
-                    : "null"));
-      }
-
       ProcessProto.LoadResponse.Builder builder = ProcessProto.LoadResponse
           .newBuilder().setStatus(convertStatus(loadResp.getStatus()))
-          .setMessage(loadResp.getMessage());
+          .setMessage(
+              loadResp.getMessage() != null ? loadResp.getMessage() : "");
 
       if (loadResp.getPayload() != null) {
         for (Object o : loadResp.getPayload()) {
-          if (o instanceof Integer) {
-            builder.addData((Integer) o);
+          if (o instanceof BigInteger) {
+            builder.addData(o.toString());
           } else if (o instanceof String) {
-            try {
-              builder.addData(Integer.parseInt((String) o));
-            } catch (NumberFormatException e) {
-              // skip invalid strings
-            }
+            builder.addData((String) o);
           }
         }
       }
@@ -79,23 +71,11 @@ public class ProcessServiceImpl
       responseObserver.onCompleted();
 
     } catch (Exception e) {
-      /*
-       * ProcessProto.LoadResponse resp = ProcessProto.LoadResponse.newBuilder()
-       * .setStatus(ProcessProto.ApiStatus.ERROR)
-       * .setMessage("Unexpected error: " + e.getMessage()).build();
-       * responseObserver.onNext(resp); responseObserver.onCompleted();
-       */
-
-      // print full stack to server log
       e.printStackTrace(System.err);
 
-      // build a message that includes the exception class + short message
       String shortMsg = (e.getMessage() != null)
           ? e.getMessage()
           : e.toString();
-
-      // If you want the full stacktrace in the proto message (useful in dev),
-      // otherwise include just the class + message.
       StringWriter sw = new StringWriter();
       e.printStackTrace(new PrintWriter(sw));
       String fullTrace = sw.toString();
@@ -112,6 +92,7 @@ public class ProcessServiceImpl
   @Override
   public void store(ProcessProto.StoreRequest request,
       StreamObserver<ProcessProto.StoreResponse> responseObserver) {
+
     try {
       if (request == null || request.getResource() == null) {
         ProcessProto.StoreResponse resp = ProcessProto.StoreResponse
@@ -122,10 +103,14 @@ public class ProcessServiceImpl
         return;
       }
 
-      Resource<?> resource = convertProtoResource(request.getResource());
+      Resource resource = convertProtoResource(request.getResource());
       Delimiter delim = convertDelimiter(request.getDelimiter());
 
-      List<Integer> payload = new ArrayList<>(request.getDataList());
+      List<BigInteger> payload = new ArrayList<>();
+      for (String s : request.getDataList()) {
+        payload.add(new BigInteger(s));
+      }
+
       StoreRequest storeReq = new StoreRequest(resource, payload, delim);
       StoreResponse storeResp = processApi.store(storeReq);
 
@@ -139,6 +124,7 @@ public class ProcessServiceImpl
       responseObserver.onCompleted();
 
     } catch (Exception e) {
+      e.printStackTrace(System.err);
       ProcessProto.StoreResponse resp = ProcessProto.StoreResponse.newBuilder()
           .setStatus(ProcessProto.ApiStatus.ERROR)
           .setMessage("Unexpected error: " + e.getMessage()).build();
@@ -147,44 +133,33 @@ public class ProcessServiceImpl
     }
   }
 
-  /**
-   * Convert proto Resource to your internal Resource<?> type
-   */
-  private Resource<?> convertProtoResource(ProcessProto.Resource proto) {
-    ResourceType type = ResourceType.UNKNOWN;
-    Object payload = null;
-
+  // Convert proto Resource to new Resource class
+  private Resource convertProtoResource(ProcessProto.Resource proto) {
+    ResourceType type;
     switch (proto.getType()) {
       case FILE :
         type = ResourceType.FILE;
-        payload = proto.getUri().trim();
-        break;
+        return new Resource(type, proto.getUri());
       case DATABASE :
         type = ResourceType.DATABASE;
-        payload = proto.getUri().trim();
-        break;
+        return new Resource(type, proto.getUri());
       case STREAM :
         type = ResourceType.STREAM;
-        payload = proto.getUri().trim();
-        break;
+        return new Resource(type, proto.getUri());
       case CUSTOM :
         type = ResourceType.CUSTOM;
-        payload = new ArrayList<Integer>(proto.getDataList());
-        break;
+        List<BigInteger> data = new ArrayList<>();
+        for (String s : proto.getDataList()) {
+          data.add(new BigInteger(s));
+        }
+        return new Resource(type, data);
       default :
         type = ResourceType.UNKNOWN;
-    }
-
-    if (type == ResourceType.CUSTOM) {
-      return new Resource<>(type, (List<Integer>) payload);
-    } else {
-      return new Resource<>(type, (String) payload);
+        return new Resource(type, (String) null);
     }
   }
 
-  /**
-   * Convert string to Delimiter enum, default to COMMA
-   */
+  // Convert string to Delimiter enum
   private Delimiter convertDelimiter(String delimStr) {
     if (delimStr == null || delimStr.isEmpty()) {
       return Delimiter.defaultDelimiter();
@@ -203,9 +178,7 @@ public class ProcessServiceImpl
     }
   }
 
-  /**
-   * Convert internal ApiStatus to ProcessProto.ApiStatus
-   */
+  // Convert internal ApiStatus to ProcessProto.ApiStatus
   private ProcessProto.ApiStatus convertStatus(shared.stuff.ApiStatus status) {
     switch (status) {
       case SUCCESS :

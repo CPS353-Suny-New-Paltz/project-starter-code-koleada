@@ -1,5 +1,6 @@
 package shared.stuff;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,9 +15,9 @@ public class PerformanceComparison {
 
   public static void main(String[] args) {
 
-    List<Integer> inputData = new ArrayList<>();
+    List<BigInteger> inputData = new ArrayList<>();
     for (int i = 0; i < 20; i++) {
-      inputData.add(i);
+      inputData.add(BigInteger.valueOf(i));
     }
 
     Resource inputResource = new Resource(ResourceType.CUSTOM, inputData);
@@ -47,8 +48,7 @@ public class PerformanceComparison {
       originalTimes[i] = compTime;
       System.out.println("Run " + i + " Computation Phase time: "
           + compTime / 1_000_000.0 + " ms");
-      TimingLogger.reset(); // reset to show differences between original and
-                            // new
+      TimingLogger.reset();
     }
 
     // improved

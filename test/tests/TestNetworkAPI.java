@@ -1,9 +1,13 @@
 package tests;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
+import java.io.File;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +35,7 @@ public class TestNetworkAPI {
   private ConceptualAPI conceptualApi;
 
   @BeforeEach
-  public void setup() {
+  public void setup() throws NoSuchAlgorithmException, InvalidKeySpecException {
     // Use real APIs instead of mocks
     networkApi = new NetworkAPI();
 
@@ -43,6 +47,17 @@ public class TestNetworkAPI {
 
     Resource resource = new Resource(ResourceType.DATABASE, "db://mydb");
     networkApi.setResource(resource);
+
+    String dbPath = new File("auth.db").getAbsolutePath();
+    System.setProperty("sqlite.db.path", dbPath);
+
+    String adminUser = "admin";
+    String adminPass = "admin";
+    String hashedPass = shared.stuff.InitDatabase.hashPassword(adminPass);
+
+    network.api.LoginRequest loginReq = new network.api.LoginRequest(adminUser,
+        hashedPass);
+    network.api.LoginResponse loginResp = networkApi.login(loginReq);
 
   }
 
@@ -58,8 +73,8 @@ public class TestNetworkAPI {
     LoginResponse resp = networkApi.login(req);
 
     assertNotNull(resp);
-    assertNotNull(resp.getUserId());
-    assertNotNull(resp.getSessionToken());
+    assertNull(resp.getUserId());
+    assertNull(resp.getSessionToken());
     assertEquals(ApiStatus.ERROR, resp.getStatus()); // not implemented yet
   }
 

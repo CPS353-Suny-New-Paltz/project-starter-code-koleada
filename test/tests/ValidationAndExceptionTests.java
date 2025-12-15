@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -19,7 +20,7 @@ import shared.stuff.Resource;
 import shared.stuff.ResourceType;
 
 /**
- * This class is used to test our paramater validation and exception handling
+ * This class is used to test our parameter validation and exception handling
  */
 public class ValidationAndExceptionTests {
 
@@ -32,60 +33,42 @@ public class ValidationAndExceptionTests {
     processAPI = new ProcessAPI();
   }
 
-  /**
-   * I think it is most benefical to test the param validation within the actual
-   * helper classes themselves. In the APIs we ensure requests are not null and
-   * then throw exceptions if they are, which aligns more with the integration
-   * tests. Ih the classes we have some more unique validation
-   */
-
-  // resource test
   @Test
   void testResourceValidation() {
     assertThrows(IllegalArgumentException.class, () -> {
-      // cannot create custom resource without a list
-      new Resource<>(ResourceType.CUSTOM, "dummy");
+      new Resource(ResourceType.CUSTOM, "dummy");
     });
   }
 
-  // load request test
   @Test
   void testLoadRequestValidation() {
-    Resource<Integer> r = new Resource<>(ResourceType.CUSTOM, List.of(1, 2));
+    Resource r = new Resource(ResourceType.CUSTOM,
+        List.of(BigInteger.ONE, BigInteger.TWO));
     assertThrows(IllegalArgumentException.class, () -> {
-      new LoadRequest(r, null); // Delimiter is null
+      new LoadRequest(r, null);
     });
   }
 
-  // computationRequest test
   @Test
   void testComputationRequestValidation() {
-    Resource<Integer> input = new Resource<>(ResourceType.CUSTOM,
-        List.of(1, 2));
-    Resource<Integer> output = new Resource<>(ResourceType.CUSTOM,
-        List.of(3, 4));
+    Resource input = new Resource(ResourceType.CUSTOM,
+        List.of(BigInteger.ONE, BigInteger.TWO));
+    Resource output = new Resource(ResourceType.CUSTOM,
+        List.of(BigInteger.valueOf(3), BigInteger.valueOf(4)));
     assertThrows(IllegalArgumentException.class, () -> {
-      new ComputationRequest(input, output, null); // Delimiter is null
+      new ComputationRequest(input, output, null);
     });
   }
 
-  // Integration test for exception hanlding
   @Test
   public void testProcessApiLoadExceptionHandling() {
-    // create a FILE resource pointing to a non-existent path
-    Resource<?> fileResource = new Resource(ResourceType.FILE,
+    Resource fileResource = new Resource(ResourceType.FILE,
         "nonexistent-file.txt");
-
     LoadRequest request = new LoadRequest(fileResource, Delimiter.COMMA);
     LoadResponse response = processAPI.load(request);
 
-    // Response should not be null
     assertNotNull(response);
-
-    // list should be empty on error
     assertEquals(0, response.getPayload().size());
-
-    // message should indicate invalid file error
     assertEquals("Invalid file: File nonexistent-file.txt does not exist",
         response.getMessage());
   }

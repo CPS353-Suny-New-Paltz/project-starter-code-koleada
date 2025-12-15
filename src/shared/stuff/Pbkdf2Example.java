@@ -57,7 +57,7 @@ public class Pbkdf2Example {
 
     int input = 1;
     System.out.println(Pbkdf2.compute(input));
-    System.out.println(FastPbkdf2.compute(input));
+    // System.out.println(FastPbkdf2.compute(input));
 
   }
 }

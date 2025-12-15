@@ -2,8 +2,11 @@ package tests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.File;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +19,6 @@ import network.api.ComputationRequest;
 import network.api.ComputationResponse;
 import network.api.Delimiter;
 import process.api.LoadRequest;
-import process.api.LoadResponse;
 import shared.stuff.Resource;
 import shared.stuff.ResourceType;
 
@@ -34,54 +36,61 @@ public class ComputeEngineIntegrationTest {
   private final MultithreadedNetworkAPI spoonSatisfier = new MultithreadedNetworkAPI();
 
   @BeforeEach
-  void setUp() {
-    // Initialize input with [1, 10, 25]
-    inputConfig = new TestInputConfig(Arrays.asList(1, 10, 25));
+  public void setUp() throws Exception {
+    inputConfig = new TestInputConfig(
+        Arrays.asList(BigInteger.ONE, BigInteger.TEN, BigInteger.valueOf(25)));
     outputConfig = new TestOutputConfig();
     dataStore = new InMemoryDataStore(inputConfig, outputConfig);
 
+    net = new NetworkAPI(); // recreate fresh
+    net.setReadWrite(dataStore);
+    net.setCompute(con);
+
+    // login here for consistency
+
+    String dbPath = new File("auth.db").getAbsolutePath();
+    System.setProperty("sqlite.db.path", dbPath);
+
+    String hashedPass = shared.stuff.InitDatabase.hashPassword("admin");
+    network.api.LoginRequest loginReq = new network.api.LoginRequest("admin",
+        hashedPass);
+    network.api.LoginResponse loginResp = net.login(loginReq);
+    System.out.println(new File("auth.db").getAbsolutePath());
+    System.out.println("Logged in? " + (net.getSessionToken() != null));
+
+    if (loginResp.getStatus() != shared.stuff.ApiStatus.SUCCESS) {
+      throw new IllegalStateException(
+          "Failed to login: " + loginResp.getMessage());
+    }
   }
 
   @Test
   void testComputeEngineIntegration() {
 
-    net.setReadWrite(proc);
-    net.setCompute(con);
-
-    // Simulate loading data
+    // Create LoadRequest with the resource
     LoadRequest loadReq = new LoadRequest(dataStore.resource,
         Delimiter.defaultDelimiter());
-    LoadResponse loadResp = dataStore.loadData(loadReq);
 
-    // Verify that loaded data matches inputConfig
+    // Load the data
+    List<BigInteger> payload = dataStore.loadData(loadReq).getPayload();
 
-    List loadedData = loadResp.getPayload();
-    String result = (String) loadedData.get(0);
+    // Convert to single string joined by delimiter for assertion
+    String result = payload.stream().map(BigInteger::toString)
+        .collect(Collectors.joining(Delimiter.defaultDelimiter().getValue()));
 
-    String expectedString = "1" + Delimiter.defaultDelimiter().getValue() + "10"
-        + Delimiter.defaultDelimiter().getValue() + "25";
-
-    // this should pass, just checking we can correctly read data, I'm still not
-    // sure what the ConceptualAPI / computation section of compute engine will
-    // even do. May have to rework entire ConceptualAPI later, I had almsot no
-    // idea what its supposed to do
-
+    String expectedString = "1,10,25";
+    System.out.println(result);
     assertEquals(expectedString, result);
 
-    // Simulate storing processed data
-
-    // create new resource using outputConfig
-    Resource<List<String>> outputSource = new Resource(ResourceType.CUSTOM,
-        dataStore.outputConfig.getOutputData());
-
+    // Simulate computation
+    Resource outputResource = new Resource(ResourceType.CUSTOM, payload);
     ComputationRequest compReq = new ComputationRequest(
-        new Resource(ResourceType.CUSTOM, inputConfig.inputData), outputSource,
-        Delimiter.defaultDelimiter());
+        new Resource(ResourceType.CUSTOM, inputConfig.inputData),
+        outputResource, Delimiter.defaultDelimiter());
+
     ComputationResponse compResp = net.compute(compReq);
 
-    // check the the result of running the computation on input 1 matches the
-    // expected result of running the computation on 1
-    assertEquals(compResp.getResults().get(0), 508141714);
-
+    // Validate computation result for first input
+    assertEquals(1303319248, compResp.getResults().get(0).intValue());
   }
 }

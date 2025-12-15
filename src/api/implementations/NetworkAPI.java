@@ -1,8 +1,15 @@
 package api.implementations;
 
+import java.math.BigInteger;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import network.api.ComputationRequest;
 import network.api.ComputationResponse;
@@ -18,17 +25,27 @@ import process.api.ProcessApi;
 import process.api.StoreRequest;
 import process.api.StoreResponse;
 import shared.stuff.ApiStatus;
+import shared.stuff.InitDatabase;
 import shared.stuff.Resource;
 
 /**
+ * 
  * Implementation of the NetworkApi interface
  */
 public class NetworkAPI implements NetworkApi {
-
-
   private ProcessApi readWrite;
 
   private ConceptualAPI compute;
+
+  // Tracks currently logged-in user info
+  private String loggedInUserId;
+  private String sessionToken;
+
+  // DB connection info
+  String path = System.getProperty("sqlite.db.path", "auth.db");
+
+  // Only letters & numbers allowed for usernames/passwords
+  private static final Pattern VALID_INPUT = Pattern.compile("^[a-zA-Z0-9]+$");
 
   public NetworkAPI() {
     // will need to communicate with the ProcessAPI to pass instructions to the
@@ -38,8 +55,7 @@ public class NetworkAPI implements NetworkApi {
                                                                    // process
                                                                    // client,
                                                                    // implements
-                                                                   // PRocessApi
-
+                                                                   // ProcessApi
 
     // Will also need to talk to the computation section to perform
     // calculations,
@@ -52,26 +68,116 @@ public class NetworkAPI implements NetworkApi {
 
   private Resource resource;
 
+  private boolean isValidInput(String input) {
+    return input != null && VALID_INPUT.matcher(input).matches();
+  }
+
   @Override
   public LoginResponse login(LoginRequest req) {
     try {
       if (req == null) {
-        throw new IllegalArgumentException("req cannot be null");
+        throw new IllegalArgumentException("Request cannot be null");
       }
 
-      return new LoginResponse(UUID.randomUUID().toString(),
-          UUID.randomUUID().toString(), ApiStatus.ERROR);
+      String username = req.getUsername();
+      String passwordHash = req.getHashedPassword(); // client pre-hashed
+
+      // only allow letters and numbers in username to prevent SQLi
+      // password is fine because it is hashed
+      if (!username.matches("^[a-zA-Z0-9]+$")) {
+        return new LoginResponse(null, null, ApiStatus.ERROR,
+            "Username must be letters and numbers only");
+      }
+
+      try (Connection conn = DriverManager
+          .getConnection("jdbc:sqlite:" + path)) {
+        String sql = "SELECT id, password_hash FROM users WHERE username = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+          stmt.setString(1, username);
+          ResultSet rs = stmt.executeQuery();
+
+          if (!rs.next()) {
+            return new LoginResponse(null, null, ApiStatus.ERROR,
+                "Invalid username or password");
+          }
+
+          // check if hashed password is equal to the provided hashed password
+          // requiring the user to hash their password prevents transmission of
+          // clear text passwords
+          String storedHash = rs.getString("password_hash");
+          if (!storedHash.equals(passwordHash)) {
+            return new LoginResponse(null, null, ApiStatus.ERROR,
+                "Invalid username or password");
+          }
+
+          // login successful, update fields
+          loggedInUserId = rs.getString("id");
+          sessionToken = UUID.randomUUID().toString();
+
+          return new LoginResponse(sessionToken, loggedInUserId,
+              ApiStatus.SUCCESS, "Login successful");
+        }
+      }
 
     } catch (IllegalArgumentException e) {
-      // null req
       return new LoginResponse(null, null, ApiStatus.ERROR,
           "Invalid request: " + e.getMessage());
+    } catch (SQLException e) {
+      return new LoginResponse(null, null, ApiStatus.ERROR,
+          "Database error: " + e.getMessage());
     } catch (Exception e) {
-      // Unexpected exceptions
       return new LoginResponse(null, null, ApiStatus.ERROR,
           "Error: " + e.getMessage());
     }
+  }
 
+  /**
+   * Create a new user in the database. Only works if the caller is logged in.
+   * 
+   * We use loginRequest and response to do this as it fits well.
+   */
+  public LoginResponse createUser(String newUsername, String newPassword) {
+    try {
+      // ensuree caller is logged in, only want active users to be able to add
+      // new users
+      if (loggedInUserId == null || sessionToken == null) {
+        return new LoginResponse(null, null, ApiStatus.ERROR,
+            "Must be logged in to create a new user");
+      }
+
+      // ensure good username
+      if (!newUsername.matches("^[a-zA-Z0-9]+$")) {
+        return new LoginResponse(null, null, ApiStatus.ERROR,
+            "Username must be letters and numbers only");
+      }
+
+      // Hash the password using the same hashing function
+      String passwordHash = InitDatabase.hashPassword(newPassword);
+
+      // add insert statement
+      try (Connection conn = DriverManager
+          .getConnection("jdbc:sqlite:" + path)) {
+        String sql = "INSERT INTO users(username, password_hash) VALUES(?, ?)";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+          stmt.setString(1, newUsername);
+          stmt.setString(2, passwordHash);
+          stmt.executeUpdate();
+        }
+      }
+
+      return new LoginResponse(null, null, ApiStatus.SUCCESS,
+          "User created successfully");
+
+    } catch (IllegalArgumentException e) {
+      return new LoginResponse(null, null, ApiStatus.ERROR,
+          "Invalid input: " + e.getMessage());
+    } catch (SQLException e) {
+      return new LoginResponse(null, null, ApiStatus.ERROR,
+          "Database error: " + e.getMessage());
+    } catch (Exception e) {
+      return new LoginResponse(null, null, ApiStatus.ERROR,
+          "Error: " + e.getMessage());
+    }
   }
 
   @Override
@@ -80,22 +186,29 @@ public class NetworkAPI implements NetworkApi {
       if (req == null) {
         throw new IllegalArgumentException("Request cannot be null");
       }
-      return new LogoutResponse(ApiStatus.ERROR);
+
+      if (sessionToken == null || !sessionToken.equals(req.getSessionToken())) {
+        return new LogoutResponse(ApiStatus.ERROR, "Invalid session token");
+      }
+
+      // clear user session
+      loggedInUserId = null;
+      sessionToken = null;
+
+      return new LogoutResponse(ApiStatus.SUCCESS, "Logout successful");
 
     } catch (IllegalArgumentException e) {
-      // catch null req
       return new LogoutResponse(ApiStatus.ERROR,
           "Invalid request: " + e.getMessage());
     } catch (Exception e) {
-      // catch all exceptions we dont expect
       return new LogoutResponse(ApiStatus.ERROR, "Error: " + e.getMessage());
     }
-
   }
 
   /**
+   * 
    * does the computation: read input, run compute, write output, return results
-   * as Arraylist<Integer>
+   * as ArrayList<BigInteger>
    */
   @Override
   public ComputationResponse compute(ComputationRequest request) {
@@ -103,8 +216,13 @@ public class NetworkAPI implements NetworkApi {
     if (request == null) {
       throw new IllegalArgumentException("Request cannot be null");
     }
+
+    if (loggedInUserId == null || sessionToken == null) {
+      return new ComputationResponse(ApiStatus.ERROR, new ArrayList<>(),
+          "User must be logged in to run computations");
+    }
     try {
-      // Load integers from input resource
+      // Load BigIntegers from input resource
       LoadResponse loadResp = readWrite.load(
           new LoadRequest(request.getInputResource(), request.getDelimiter()));
       if (loadResp.getStatus() != ApiStatus.SUCCESS) {
@@ -112,18 +230,17 @@ public class NetworkAPI implements NetworkApi {
             loadResp.getMessage());
       }
 
-      // expect the input integers to be in a List<Integer>, provided
-      // in LoadResponse
-      List<Integer> inputs = loadResp.getPayload();
-      List<Integer> results = new ArrayList<>();
+      // input list of BigInteger
+      List<BigInteger> inputs = loadResp.getPayload();
+      List<BigInteger> results = new ArrayList<>();
 
-      // Run computation for each input
-      for (int value : inputs) {
+      // Run computation for each BigInteger
+      for (BigInteger value : inputs) {
         results.add(compute.performComputation(value).getResult());
       }
 
       // Store results in output resource
-      List resultBatch = new ArrayList<>(results);
+      List<BigInteger> resultBatch = new ArrayList<>(results);
       StoreResponse storeResp = readWrite.store(new StoreRequest(
           request.getOutputResource(), resultBatch, request.getDelimiter()));
 
@@ -135,8 +252,7 @@ public class NetworkAPI implements NetworkApi {
         return new ComputationResponse(ApiStatus.ERROR, new ArrayList<>(), msg);
       }
 
-      // return ComputationResponse to the user, results stored in a
-      // List
+      // return ComputationResponse to the user, results stored in a List
       return new ComputationResponse(ApiStatus.SUCCESS, resultBatch,
           "Computation completed");
 
@@ -162,7 +278,15 @@ public class NetworkAPI implements NetworkApi {
     return readWrite;
   }
 
-  public void setReadWrite(ProcessAPI readWrite) {
+  public String getSessionToken() {
+    return sessionToken;
+  }
+
+  public String getLoggedInUserId() {
+    return loggedInUserId;
+  }
+
+  public void setReadWrite(ProcessApi readWrite) {
     this.readWrite = readWrite;
   }
 
@@ -182,25 +306,4 @@ public class NetworkAPI implements NetworkApi {
     this.resource = resource;
   }
 
-  /**
-   * These do not belong in the network api, just leaving them commented out
-   * incase i need this later.
-   * 
-   * @Override public StoreDataResponse storeData(StoreDataRequest req) {
-   * 
-   *           StoreResponse resp = readWrite.store(new
-   *           StoreRequest(req.getDestination(), req.getPayload(),
-   *           req.getDelimiter())); return new
-   *           StoreDataResponse(resp.getStatus(), req.getDestination(),
-   *           resp.getMessage());
-   * 
-   *           }
-   * 
-   * @Override public LoadDataResponse loadData(LoadDataRequest req) {
-   *           LoadResponse resp = readWrite .load(new
-   *           LoadRequest(req.getSource(), req.getDelimiter()));
-   * 
-   *           return new LoadDataResponse(resp.getStatus(), resp.getData(),
-   *           defaultDelimiter, resp.getMessage()); }
-   */
 }

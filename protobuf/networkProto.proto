@@ -5,7 +5,6 @@ package project.network.grpc;
 option java_package = "project.network.grpc";
 option java_outer_classname = "NetworkProto";
 
-
 enum ApiStatus {
   UNKNOWN = 0;
   SUCCESS = 1;
@@ -23,11 +22,10 @@ enum ResourceType {
   STREAM = 4;
 }
 
-
 message Resource {
   optional ResourceType type = 1;
-  optional string uri = 2;         // For FILE/DB 
-  repeated int32 data = 3;         // For CUSTOM 
+  optional string uri = 2;              // For FILE/DB
+  repeated string data = 3;             // For CUSTOM (changed from int32 → string for BigInteger)
 }
 
 message ComputationRequest {
@@ -36,14 +34,36 @@ message ComputationRequest {
   optional string delimiter = 3;
 }
 
-
 message ComputationResponse {
   optional ApiStatus status = 1;
-  repeated int32 results = 2;
+  repeated string results = 2;          // changed from int32 → string for BigInteger
   optional string message = 3;
 }
 
+message LoginRequest {
+  required string username = 1;
+  required string hashed_password = 2;
+}
+
+message LoginResponse {
+  optional string session_token = 1;
+  optional string user_id = 2;
+  optional ApiStatus status = 3;
+  optional string message = 4;
+}
+
+message LogoutRequest {
+  required string session_token = 1;
+}
+
+message LogoutResponse {
+  optional ApiStatus status = 1;
+  optional string message = 2;
+}
 
 service NetworkService {
+  rpc Login(LoginRequest) returns (LoginResponse);
+  rpc Logout(LogoutRequest) returns (LogoutResponse);
+
   rpc Compute(ComputationRequest) returns (ComputationResponse);
 }

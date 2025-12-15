@@ -2,6 +2,7 @@ package tests;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,10 +23,9 @@ public class PerformanceTest {
 
   @Test
   public void testComputeVsComputeFast() {
-    // Prepare input data
-    List<Integer> inputData = new ArrayList<>();
-    for (int i = 0; i < 20; i++) { // Increase iterations for better measurement
-      inputData.add(i);
+    List<BigInteger> inputData = new ArrayList<>();
+    for (int i = 0; i < 20; i++) {
+      inputData.add(BigInteger.valueOf(i));
     }
 
     Resource inputResource = new Resource(ResourceType.CUSTOM, inputData);
@@ -35,14 +35,12 @@ public class PerformanceTest {
     ComputationRequest request = new ComputationRequest(inputResource,
         outputResource, Delimiter.defaultDelimiter());
 
-    // Setup coordinator with real APIs
     MultithreadedNetworkAPI coordinator = new MultithreadedNetworkAPI();
     coordinator.setCompute(new ConceptualAPI());
     coordinator.setReadWrite(new ProcessAPI());
 
-    // normal version
     TimingLogger.reset();
-    int runs = 5; // number of times to run
+    int runs = 5;
     for (int i = 0; i < runs; i++) {
       ComputationResponse resp = coordinator.compute(request);
       if (resp.getStatus() != ApiStatus.SUCCESS) {
@@ -53,7 +51,6 @@ public class PerformanceTest {
     long originalCompPhaseTotal = TimingLogger
         .getTotalTime("Computation Phase");
 
-    // fast
     TimingLogger.reset();
     for (int i = 0; i < runs; i++) {
       ComputationResponse resp = coordinator.computeFast(request);
@@ -64,12 +61,10 @@ public class PerformanceTest {
     }
     long fastCompPhaseTotal = TimingLogger.getTotalTime("Computation Phase");
 
-    // Calculate percentage improvement
     double improvement = ((double) (originalCompPhaseTotal - fastCompPhaseTotal)
         / originalCompPhaseTotal) * 100.0;
     System.out.println("Computation Phase improvement: " + improvement + "%");
 
-    // at least 10% improvement
     assertTrue(improvement >= 10.0,
         "Fast compute should be at least 10% faster than original compute");
   }

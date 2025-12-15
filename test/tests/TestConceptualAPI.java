@@ -3,6 +3,7 @@ package tests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -14,11 +15,11 @@ import conceptual.api.JobResponse;
 import conceptual.api.JobStatus;
 
 /**
- * Test suiute for the ConceptualAPI implementation
+ * Test suite for the ConceptualAPI implementation
  */
 public class TestConceptualAPI {
 
-  private ConceptualApi conceptualApi;
+  private ConceptualApi<BigInteger> conceptualApi;
 
   /**
    * Create ConceptualAPI
@@ -36,11 +37,14 @@ public class TestConceptualAPI {
   @Test
   void testPerformJob() throws NoSuchAlgorithmException {
 
-    JobResponse resp = conceptualApi.performComputation(5);
+    JobResponse<BigInteger> resp = conceptualApi
+        .performComputation(BigInteger.valueOf(5));
 
     assertNotNull(resp);
     assertEquals(JobStatus.COMPLETED, resp.getStatus());
-    assertEquals(1585103782, resp.getResult());
+
+    // FIX: Compare as BigInteger
+    assertEquals(BigInteger.valueOf(1059424610), resp.getResult());
   }
 
   /**
@@ -51,7 +55,8 @@ public class TestConceptualAPI {
   @Test
   void testCheckStatus() throws NoSuchAlgorithmException {
 
-    JobResponse response = conceptualApi.performComputation(5);
+    JobResponse<BigInteger> response = conceptualApi
+        .performComputation(BigInteger.valueOf(5));
 
     String jobId = response.getJobId();
 

@@ -1,5 +1,6 @@
 package api.implementations;
 
+import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.UUID;
@@ -9,13 +10,12 @@ import conceptual.api.ConceptualApi;
 import conceptual.api.JobResponse;
 import conceptual.api.JobStatus;
 import shared.stuff.FastPbkdf2;
-import shared.stuff.Pbkdf2;
 
 /**
+ * 
  * Implementation of the ConceptualApi interface
  */
-public class ConceptualAPI implements ConceptualApi {
-
+public class ConceptualAPI implements ConceptualApi<BigInteger> {
   // Tracks status of each job jobId -> JobStatus
   private Map<String, JobStatus> jobStatuses;
 
@@ -25,86 +25,76 @@ public class ConceptualAPI implements ConceptualApi {
   }
 
   @Override
-  public JobResponse checkStatus(String jobId) {
+  public JobResponse<BigInteger> checkStatus(String jobId) {
     try {
       if (jobId == null) {
         throw new IllegalArgumentException(
             "Cannot check status for null JobId");
       }
+
       JobStatus status = jobStatuses.get(jobId);
-      return new JobResponse(jobId, status, -1);
+      return new JobResponse<>(jobId, status, null);
 
     } catch (IllegalArgumentException e) {
-      // catch null job request
-      return new JobResponse(null, JobStatus.FAILED, -1);
+      return new JobResponse<>(null, JobStatus.FAILED, null);
     } catch (Exception e) {
-      // catch unexpected
-      return new JobResponse(null, JobStatus.FAILED, -1);
+      return new JobResponse<>(null, JobStatus.FAILED, null);
     }
   }
 
   /**
-   * 
-   * Run the PBKDF2-style computation on a single integer.
-   * 
-   * @param input
-   *          integer input
-   * 
-   * @return computed result
-   * 
-   * @throws NoSuchAlgorithmException
-   *           if SHA-256 is unavailable
+   * Run the PBKDF2-style computation on a single BigInteger.
    */
   @Override
-  public JobResponse performComputation(int input) {
+  public JobResponse<BigInteger> performComputation(BigInteger input) {
 
-    // do not need to check if input is null because primitive type int cannot
-    // be null
+    if (input == null) {
+      String jobId = UUID.randomUUID().toString();
+      jobStatuses.put(jobId, JobStatus.FAILED);
+      return new JobResponse<>(jobId, JobStatus.FAILED, null);
+    }
 
     String jobId = UUID.randomUUID().toString();
     jobStatuses.put(jobId, JobStatus.RUNNING);
 
     try {
-      // PBKDF2 computation
-      int result = Pbkdf2.compute(input);
+      BigInteger result = FastPbkdf2.compute(input);
       jobStatuses.put(jobId, JobStatus.COMPLETED);
-      return new JobResponse(jobId, JobStatus.COMPLETED, result);
+      return new JobResponse<>(jobId, JobStatus.COMPLETED, result);
 
     } catch (NoSuchAlgorithmException e) {
-      // can be thrown by calling .compute()
       jobStatuses.put(jobId, JobStatus.FAILED);
-      return new JobResponse(jobId, JobStatus.FAILED, -1);
+      return new JobResponse<>(jobId, JobStatus.FAILED, null);
 
     } catch (Exception e) {
-      // add to map and catch unexpected
       jobStatuses.put(jobId, JobStatus.FAILED);
-      return new JobResponse(jobId, JobStatus.FAILED, -1);
+      return new JobResponse<>(jobId, JobStatus.FAILED, null);
     }
   }
 
-  public JobResponse performComputationFast(int input) {
+  public JobResponse<BigInteger> performComputationFast(BigInteger input) {
 
-    // do not need to check if input is null because primitive type int cannot
-    // be null
+    if (input == null) {
+      String jobId = UUID.randomUUID().toString();
+      jobStatuses.put(jobId, JobStatus.FAILED);
+      return new JobResponse<>(jobId, JobStatus.FAILED, null);
+    }
 
     String jobId = UUID.randomUUID().toString();
     jobStatuses.put(jobId, JobStatus.RUNNING);
 
     try {
-      // PBKDF2 computation
-      int result = FastPbkdf2.compute(input);
+      BigInteger result = FastPbkdf2.compute(input);
       jobStatuses.put(jobId, JobStatus.COMPLETED);
-      return new JobResponse(jobId, JobStatus.COMPLETED, result);
+      return new JobResponse<>(jobId, JobStatus.COMPLETED, result);
 
     } catch (NoSuchAlgorithmException e) {
-      // can be thrown by calling .compute()
       jobStatuses.put(jobId, JobStatus.FAILED);
-      return new JobResponse(jobId, JobStatus.FAILED, -1);
+      return new JobResponse<>(jobId, JobStatus.FAILED, null);
 
     } catch (Exception e) {
-      // add to map and catch unexpected
       jobStatuses.put(jobId, JobStatus.FAILED);
-      return new JobResponse(jobId, JobStatus.FAILED, -1);
+      return new JobResponse<>(jobId, JobStatus.FAILED, null);
     }
   }
 }
