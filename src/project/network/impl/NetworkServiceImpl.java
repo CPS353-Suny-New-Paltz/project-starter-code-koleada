@@ -74,8 +74,9 @@ public class NetworkServiceImpl
           .newBuilder();
       respBuilder.setStatus(
           NetworkProto.ApiStatus.valueOf(logoutResp.getStatus().name()));
-      if (logoutResp.getMessage() != null)
+      if (logoutResp.getMessage() != null) {
         respBuilder.setMessage(logoutResp.getMessage());
+      }
 
       responseObserver.onNext(respBuilder.build());
       responseObserver.onCompleted();
